@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="wallpaper">
+        <item>None</item>
+        <item>Color</item>
+        <item>Image</item>
+    </string-array>
+    <string-array name="idle_modes">
+        <item>White</item>
+        <item>Gray Scale</item>
+        <item>Color</item>
+    </string-array>
+    <string-array name="align_modes">
+        <item>Left</item>
+        <item>Center</item>
+        <item>Right</item>
+    </string-array>
+    <string-array name="pref_types">
+        <item>Text</item>
+        <item>Date/Time</item>
+    </string-array>
+</resources>

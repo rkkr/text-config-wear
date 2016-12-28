@@ -1,0 +1,20 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="1"
+        android:title="Alignment"
+        android:entries="@array/align_modes"
+        android:entryValues="@array/align_modes"
+        android:key="row1_align_mode_preference"/>
+
+    <PreferenceCategory
+        android:title="Items"
+        android:key="row1_items">
+
+        <Preference
+            android:title="Add New..."
+            android:key="add_new">
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,17 @@
+general settings
+    background image
+    idle mode - grey scale/white/color
+    
+
+5 rows
+    allignment
+    spacing
+
+    items
+        text/clock/steps/active time/weather
+        contents
+        size
+        font (bold, italick, caps, slim)
+        +icon?
+        
+    
