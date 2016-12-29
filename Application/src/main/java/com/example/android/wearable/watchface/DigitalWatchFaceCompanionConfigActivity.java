@@ -50,7 +50,7 @@ public class DigitalWatchFaceCompanionConfigActivity extends Activity
     private static final String TAG = "DigitalWatchFaceConfig";
 
     // TODO: use the shared constants (needs covering all the samples with Gradle build model)
-    private static final String KEY_BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    private static final String KEY_BACKGROUND_COLOR = "wallpaper_color";
     private static final String KEY_HOURS_COLOR = "HOURS_COLOR";
     private static final String KEY_MINUTES_COLOR = "MINUTES_COLOR";
     private static final String KEY_SECONDS_COLOR = "SECONDS_COLOR";

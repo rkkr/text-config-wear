@@ -4,10 +4,10 @@
 
     <ListPreference
         android:defaultValue="1"
-        android:title="Wallpaper"
-        android:entries="@array/wallpaper"
-        android:entryValues="@array/wallpaper"
-        android:key="wallpaper_preference"
+        android:title="Wallpaper Color"
+        android:entries="@array/font_color"
+        android:entryValues="@array/font_color"
+        android:key="wallpaper_color"
         android:summary="Select wallpaper" />
     <ListPreference
         android:defaultValue="1"

@@ -11,18 +11,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
-        //if (key.equals(KEY_PREF_SYNC_CONN)) {
-        //    Preference connectionPref = findPreference(key);
-            // Set summary to be the user-description for the selected value
-        //    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-        //}
-    }
-
+public class MainActivity extends SettingsCommon {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,18 +21,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 .commit();
 
         setupActionBar();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public static class PreferencesFragment extends PreferenceFragment {

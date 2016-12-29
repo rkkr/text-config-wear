@@ -165,8 +165,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         float mLineHeight;
         String mAmString;
         String mPmString;
-        int mInteractiveBackgroundColor =
-                DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND;
+        String mInteractiveBackgroundColor =
+                DigitalWatchFaceUtil.COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND;
         int mInteractiveHourDigitsColor =
                 DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS;
         int mInteractiveMinuteDigitsColor =
@@ -199,7 +199,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mPmString = resources.getString(R.string.digital_pm);
 
             mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(mInteractiveBackgroundColor);
+            mBackgroundPaint.setColor(DigitalWatchFaceUtil.parseColor(mInteractiveBackgroundColor));
             mDatePaint = createTextPaint(resources.getColor(R.color.digital_date));
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
@@ -342,7 +342,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
             }
             adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+                    DigitalWatchFaceUtil.COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND);
             adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
             adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
@@ -371,6 +371,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         private void adjustPaintColorToCurrentMode(Paint paint, int interactiveColor,
                                                    int ambientColor) {
             paint.setColor(isInAmbientMode() ? ambientColor : interactiveColor);
+        }
+
+        private void adjustPaintColorToCurrentMode(Paint paint, String interactiveColor, String ambientColor) {
+            if (isInAmbientMode())
+                paint.setColor(DigitalWatchFaceUtil.parseColor(ambientColor));
+            else
+                paint.setColor(DigitalWatchFaceUtil.parseColor(interactiveColor));
         }
 
         @Override
@@ -414,9 +421,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             }
         }
 
-        private void setInteractiveBackgroundColor(int color) {
+        private void setInteractiveBackgroundColor(String color) {
             mInteractiveBackgroundColor = color;
-            updatePaintIfInteractive(mBackgroundPaint, color);
+            if (!isInAmbientMode() && mBackgroundPaint != null)
+                mBackgroundPaint.setColor(DigitalWatchFaceUtil.parseColor(color));
+            //updatePaintIfInteractive(mBackgroundPaint, color);
         }
 
         private void setInteractiveHourDigitsColor(int color) {
@@ -551,14 +560,20 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void setDefaultValuesForMissingConfigKeys(DataMap config) {
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_BACKGROUND_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+            addStringKeyIfMissing(config, DigitalWatchFaceUtil.KEY_BACKGROUND_COLOR,
+                    DigitalWatchFaceUtil.COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND);
             addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_HOURS_COLOR,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
             addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_MINUTES_COLOR,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
             addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_SECONDS_COLOR,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
+        }
+
+        private void addStringKeyIfMissing(DataMap config, String key, String value) {
+            if (!config.containsKey(key)) {
+                config.putString(key, value);
+            }
         }
 
         private void addIntKeyIfMissing(DataMap config, String key, int color) {
@@ -595,10 +610,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 if (!config.containsKey(configKey)) {
                     continue;
                 }
-                int color = config.getInt(configKey);
+                String color = config.getString(configKey);
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Found watch face config key: " + configKey + " -> "
-                            + Integer.toHexString(color));
+                    Log.d(TAG, "Found watch face config key: " + configKey + " -> " + color);
                 }
                 if (updateUiForKey(configKey, color)) {
                     uiUpdated = true;
@@ -615,15 +629,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
          *
          * @return whether UI has been updated
          */
-        private boolean updateUiForKey(String configKey, int color) {
+        private boolean updateUiForKey(String configKey, String color) {
             if (configKey.equals(DigitalWatchFaceUtil.KEY_BACKGROUND_COLOR)) {
                 setInteractiveBackgroundColor(color);
-            } else if (configKey.equals(DigitalWatchFaceUtil.KEY_HOURS_COLOR)) {
+            /*} else if (configKey.equals(DigitalWatchFaceUtil.KEY_HOURS_COLOR)) {
                 setInteractiveHourDigitsColor(color);
             } else if (configKey.equals(DigitalWatchFaceUtil.KEY_MINUTES_COLOR)) {
                 setInteractiveMinuteDigitsColor(color);
             } else if (configKey.equals(DigitalWatchFaceUtil.KEY_SECONDS_COLOR)) {
-                setInteractiveSecondDigitsColor(color);
+                setInteractiveSecondDigitsColor(color);*/
             } else {
                 Log.w(TAG, "Ignoring unknown config key: " + configKey);
                 return false;

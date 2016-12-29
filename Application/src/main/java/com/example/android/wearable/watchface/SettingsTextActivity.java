@@ -15,20 +15,10 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 
-public class SettingsTextActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsTextActivity extends SettingsCommon {
 
     private static int rowNum;
     private static int itemNum;
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        try {
-            Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
-        } catch (Exception e) {
-
-        }
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,18 +33,6 @@ public class SettingsTextActivity extends PreferenceActivity implements SharedPr
                 .commit();
 
         setupActionBar();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public static class PreferencesFragment extends PreferenceFragment {

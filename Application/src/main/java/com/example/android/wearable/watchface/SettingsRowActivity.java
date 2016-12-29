@@ -15,14 +15,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class SettingsRowActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsRowActivity extends SettingsCommon {
 
     private static int rowNum;
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +31,6 @@ public class SettingsRowActivity extends PreferenceActivity implements SharedPre
                 .commit();
 
         setupActionBar();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public static class PreferencesFragment extends PreferenceFragment {

@@ -37,7 +37,7 @@ public final class DigitalWatchFaceUtil {
      * The {@link DataMap} key for {@link DigitalWatchFaceService} background color name.
      * The color name must be a {@link String} recognized by {@link Color#parseColor}.
      */
-    public static final String KEY_BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    public static final String KEY_BACKGROUND_COLOR = "wallpaper_color";
 
     /**
      * The {@link DataMap} key for {@link DigitalWatchFaceService} hour digits color name.
@@ -60,14 +60,14 @@ public final class DigitalWatchFaceUtil {
     /**
      * The path for the {@link DataItem} containing {@link DigitalWatchFaceService} configuration.
      */
-    public static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
+    public static final String PATH_WITH_FEATURE = "/watch_face_config";
 
     /**
      * Name of the default interactive mode background color and the ambient mode background color.
      */
     public static final String COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND = "Black";
-    public static final int COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND =
-            parseColor(COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND);
+    //public static final int COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND =
+    //        parseColor(COLOR_NAME_DEFAULT_AND_AMBIENT_BACKGROUND);
 
     /**
      * Name of the default interactive mode hour digits color and the ambient mode hour digits
@@ -105,7 +105,7 @@ public final class DigitalWatchFaceUtil {
         void onConfigDataMapFetched(DataMap config);
     }
 
-    private static int parseColor(String colorName) {
+    public static int parseColor(String colorName) {
         return Color.parseColor(colorName.toLowerCase());
     }
 
