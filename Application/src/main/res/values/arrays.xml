@@ -19,4 +19,24 @@
         <item>Text</item>
         <item>Date/Time</item>
     </string-array>
+    <string-array name="font_size" >
+        <item>10dp</item>
+        <item>20dp</item>
+        <item>30dp</item>
+        <item>40dp</item>
+        <item>50dp</item>
+        <item>60dp</item>
+    </string-array>
+    <string-array name="font_type" >
+        <item>Bold</item>
+        <item>Italic</item>
+        <item>All Caps</item>
+    </string-array>
+    <string-array name="font_color" >
+        <item>White</item>
+        <item>Red</item>
+        <item>Blue</item>
+        <item>Green</item>
+        <item>Black</item>
+    </string-array>
 </resources>

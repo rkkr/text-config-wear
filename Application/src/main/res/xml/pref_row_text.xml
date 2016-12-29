@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="Text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Text"
+        android:key="_text_value" />
+
+    <ListPreference
+        android:title="Font Size"
+        android:entries="@array/font_size"
+        android:entryValues="@array/font_size"
+        android:key="_text_size" />
+
+    <MultiSelectListPreference
+        android:title="Font Type"
+        android:entries="@array/font_type"
+        android:entryValues="@array/font_type"
+        android:key="_text_font" />
+
+    <ListPreference
+        android:title="Font Color"
+        android:entries="@array/font_color"
+        android:entryValues="@array/font_color"
+        android:key="_text_color" />
+
+</PreferenceScreen>

@@ -7,13 +7,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 public class SettingsRowActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static String rowNum;
+    private static int rowNum;
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -25,7 +29,7 @@ public class SettingsRowActivity extends PreferenceActivity implements SharedPre
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        rowNum = intent.getStringExtra("ROW_ID");
+        rowNum = intent.getIntExtra("ROW_ID", 1);
 
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
@@ -54,8 +58,32 @@ public class SettingsRowActivity extends PreferenceActivity implements SharedPre
 
             addPreferencesFromResource(R.xml.pref_row_content);
 
-            Preference row = findPreference("add_new");
-            row.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            PreferenceScreen screen = this.getPreferenceScreen();
+
+            ArrayList<Integer> rowItems = Util.GetRowItems(screen.getContext(), rowNum);
+            PreferenceCategory category = (PreferenceCategory)findPreference("row_items");
+
+            for (Integer item : rowItems)
+            {
+                Preference pref = new Preference(screen.getContext());
+                pref.setTitle(Util.GetRowItemType(screen.getContext(), rowNum, item));
+                final int itemNum = item;
+                pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        Intent intent = new Intent(getView().getContext(), SettingsTextActivity.class);
+                        intent.putExtra("ROW_ID", rowNum);
+                        intent.putExtra("ITEM_ID", itemNum);
+                        getView().getContext().startActivity(intent);
+                        return true;
+                    }
+                });
+                category.addPreference(pref);
+            }
+
+            Preference pref = new Preference(screen.getContext());
+            pref.setTitle("Add new...");
+            pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     FragmentManager fm = getFragmentManager();
@@ -65,6 +93,7 @@ public class SettingsRowActivity extends PreferenceActivity implements SharedPre
                     return true;
                 }
             });
+            category.addPreference(pref);
         }
     }
 

@@ -9,12 +9,7 @@
 
     <PreferenceCategory
         android:title="Items"
-        android:key="row1_items">
-
-        <Preference
-            android:title="Add New..."
-            android:key="add_new">
-        </Preference>
+        android:key="row_items">
     </PreferenceCategory>
 
 </PreferenceScreen>

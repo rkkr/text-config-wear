@@ -56,11 +56,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
             for (int i=1; i<=5; i++) {
                 Preference row = findPreference("row" + i + "_preference");
+                final int rowNum = i;
                 row.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
                         Intent intent = new Intent(getView().getContext(), SettingsRowActivity.class);
-                        intent.putExtra("ROW_ID", preference.getKey());
+                        intent.putExtra("ROW_ID", rowNum);
                         getView().getContext().startActivity(intent);
                         return true;
                     }
