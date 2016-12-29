@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.wearable.companion.WatchFaceCompanion;
 import android.util.Log;
 
@@ -36,6 +37,7 @@ import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Wearable;
 
 public class SettingsCommon extends PreferenceActivity
@@ -146,7 +148,12 @@ public class SettingsCommon extends PreferenceActivity
             DataMap config = new DataMap();
             config.putString(key, value);
             byte[] rawData = config.toByteArray();
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData);
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+                @Override
+                public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                    Log.d("Settings", "Send message: " + sendMessageResult.getStatus().getStatusMessage());
+                }
+            });
         }
     }
 }

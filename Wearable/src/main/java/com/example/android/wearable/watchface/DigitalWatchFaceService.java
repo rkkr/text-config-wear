@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -28,6 +29,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -35,9 +38,11 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Releasable;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -132,9 +137,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         final BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mCalendar.setTimeZone(TimeZone.getDefault());
-                initFormats();
-                invalidate();
+                if (intent.getAction().equals("text.config.wear.SETTING_CHANGED"))
+                    updateUiForConfig();
+                else {
+                    mCalendar.setTimeZone(TimeZone.getDefault());
+                    initFormats();
+                    invalidate();
+                }
             }
         };
 
@@ -271,8 +280,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 return;
             }
             mRegisteredReceiver = true;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+            filter.addAction("text.config.wear.SETTING_CHANGED");
             DigitalWatchFaceService.this.registerReceiver(mReceiver, filter);
         }
 
@@ -621,6 +632,37 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (uiUpdated) {
                 invalidate();
             }
+        }
+
+        private void updateUiForConfig() {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+            //Common
+            setInteractiveBackgroundColor(prefs.getString("wallpaper_color", "Black"));
+            //mInteractiveBackgroundColor = ;
+
+            //Rows
+
+            //wake screen
+
+            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+            //PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            //final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "WatchFaceWakelockTag");
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "WatchFaceWakelockTag");
+
+
+            mWakeLock.acquire();
+            Handler mWakeLockHandler = new Handler();
+            mWakeLockHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mWakeLock.release();
+                }
+            }, 5000);
+
+            invalidate();
         }
 
         /**
