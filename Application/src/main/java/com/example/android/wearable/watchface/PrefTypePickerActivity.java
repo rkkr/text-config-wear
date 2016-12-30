@@ -29,20 +29,14 @@ public class PrefTypePickerActivity extends DialogFragment {
 
                 String selected = list.getItemAtPosition(position).toString();
                 int itemNum = Util.AddRowItem(getView().getContext(), rowNum, selected);
+                Class itemClass = Util.GetRowItemClass(selected);
+                if (itemClass == Object.class)
+                    throw new Resources.NotFoundException(selected);
 
-                switch (selected) {
-                    case "Text":
-                        Intent intent = new Intent(getView().getContext(), SettingsTextActivity.class);
-                        intent.putExtra("ROW_ID", rowNum);
-                        intent.putExtra("ITEM_ID", itemNum);
-                        getView().getContext().startActivity(intent);
-                        break;
-                    case "Date/Time":
-                        break;
-                    default:
-                        throw new Resources.NotFoundException(selected);
-
-                }
+                Intent intent = new Intent(getView().getContext(), itemClass);
+                intent.putExtra("ROW_ID", rowNum);
+                intent.putExtra("ITEM_ID", itemNum);
+                getView().getContext().startActivity(intent);
 
                 context.dismiss();
             }

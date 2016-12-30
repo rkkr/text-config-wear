@@ -3,7 +3,7 @@ package com.example.android.wearable.watchface;
 import android.content.Intent;
 import android.os.Bundle;
 
-public class SettingsTextActivity extends SettingsCommon {
+public class SettingsTimeActivity extends SettingsCommon {
 
     private static int rowNum;
     private static int itemNum;
@@ -27,8 +27,7 @@ public class SettingsTextActivity extends SettingsCommon {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState, rowNum, itemNum);
 
-            AddEditTextPreference("Text", "text_value");
-
+            AddListPreference("Time value", "time_item", R.array.time_item);
         }
     }
 }

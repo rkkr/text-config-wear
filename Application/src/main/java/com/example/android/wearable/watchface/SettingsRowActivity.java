@@ -29,8 +29,6 @@ public class SettingsRowActivity extends SettingsCommon {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-
-        setupActionBar();
     }
 
     public static class PreferencesFragment extends PreferenceFragment {
@@ -49,12 +47,18 @@ public class SettingsRowActivity extends SettingsCommon {
             for (Integer item : rowItems)
             {
                 Preference pref = new Preference(screen.getContext());
-                pref.setTitle(Util.GetRowItemType(screen.getContext(), rowNum, item));
+                String itemType = Util.GetRowItemType(screen.getContext(), rowNum, item);
+                pref.setTitle(itemType);
                 final int itemNum = item;
+                final Class itemClass = Util.GetRowItemClass(itemType);
+
                 pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
-                        Intent intent = new Intent(getView().getContext(), SettingsTextActivity.class);
+                        if (itemClass == Object.class)
+                            return false;
+
+                        Intent intent = new Intent(getView().getContext(), itemClass);
                         intent.putExtra("ROW_ID", rowNum);
                         intent.putExtra("ITEM_ID", itemNum);
                         getView().getContext().startActivity(intent);
@@ -77,14 +81,6 @@ public class SettingsRowActivity extends SettingsCommon {
                 }
             });
             category.addPreference(pref);
-        }
-    }
-
-    private void setupActionBar() {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            // Show the Up button in the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 }

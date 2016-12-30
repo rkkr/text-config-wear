@@ -16,16 +16,16 @@
         <item>Right</item>
     </string-array>
     <string-array name="pref_types">
+        <item>Time</item>
+        <item>Date</item>
         <item>Text</item>
-        <item>Date/Time</item>
     </string-array>
     <string-array name="font_size" >
-        <item>10dp</item>
-        <item>20dp</item>
-        <item>30dp</item>
-        <item>40dp</item>
-        <item>50dp</item>
-        <item>60dp</item>
+        <item>10</item>
+        <item>20</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
     </string-array>
     <string-array name="font_type" >
         <item>Bold</item>
@@ -38,5 +38,19 @@
         <item>Blue</item>
         <item>Green</item>
         <item>Black</item>
+    </string-array>
+    <string-array name="time_item" >
+        <item>Hour (12H)</item>
+        <item>Hour (24H)</item>
+        <item>AM/PM</item>
+        <item>Minute</item>
+        <item>Second</item>
+    </string-array>
+    <string-array name="date_item" >
+        <item>Year (YYYY)</item>
+        <item>Year (YY)</item>
+        <item>Month</item>
+        <item>Day of Month</item>
+        <item>Weekday</item>
     </string-array>
 </resources>

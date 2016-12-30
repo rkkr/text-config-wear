@@ -44,4 +44,19 @@ class Util {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_type", "");
     }
 
+    public static Class GetRowItemClass(String itemType)
+    {
+        switch (itemType)
+        {
+            case "Text":
+                return SettingsTextActivity.class;
+            case "Time":
+                return SettingsTimeActivity.class;
+            case "Date":
+                return SettingsDateActivity.class;
+            default:
+                return Object.class;
+        }
+    }
+
 }

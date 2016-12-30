@@ -16,13 +16,10 @@
 
 package com.example.android.wearable.watchface;
 
-import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -33,10 +30,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Wearable;
 
@@ -60,6 +54,8 @@ public class SettingsCommon extends PreferenceActivity
                 .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
+
+        setupActionBar();
     }
 
     @Override
@@ -88,29 +84,25 @@ public class SettingsCommon extends PreferenceActivity
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    @Override // GoogleApiClient.ConnectionCallbacks
+    @Override
     public void onConnected(Bundle connectionHint) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "onConnected: " + connectionHint);
         }
 
-        if (mPeerId != null) {
-            //Uri.Builder builder = new Uri.Builder();
-            //Uri uri = builder.scheme("wear").path(PATH_WITH_FEATURE).authority(mPeerId).build();
-            //Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(this);
-        } else {
+        if (mPeerId == null) {
             displayNoConnectedDeviceDialog();
         }
     }
 
-    @Override // GoogleApiClient.ConnectionCallbacks
+    @Override
     public void onConnectionSuspended(int cause) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "onConnectionSuspended: " + cause);
         }
     }
 
-    @Override // GoogleApiClient.OnConnectionFailedListener
+    @Override
     public void onConnectionFailed(ConnectionResult result) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "onConnectionFailed: " + result);
@@ -154,6 +146,13 @@ public class SettingsCommon extends PreferenceActivity
                     Log.d("Settings", "Send message: " + sendMessageResult.getStatus().getStatusMessage());
                 }
             });
+        }
+    }
+
+    private void setupActionBar() {
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 }
