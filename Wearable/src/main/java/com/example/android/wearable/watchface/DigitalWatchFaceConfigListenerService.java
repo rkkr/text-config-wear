@@ -27,13 +27,14 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 public class DigitalWatchFaceConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
+    public static final String PATH_WITH_FEATURE = "/watch_face_config";
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
 
         Log.d(TAG, "onMessageReceived: " + messageEvent);
 
-        if (!messageEvent.getPath().equals(DigitalWatchFaceUtil.PATH_WITH_FEATURE)) {
+        if (!messageEvent.getPath().equals(PATH_WITH_FEATURE)) {
             return;
         }
         byte[] rawData = messageEvent.getData();
