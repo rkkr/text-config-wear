@@ -13,12 +13,12 @@ public class DrawableTime extends DrawableItemCommon {
     public DrawableTime(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "time_item");
+        timeItem = GetRowItemString(rowIndex, itemIndex, "item");
 
         calendar = Calendar.getInstance();
     }
 
-    public void Draw(Canvas canvas, int startX, int startY)
+    public String GetText()
     {
         long now = System.currentTimeMillis();
         calendar.setTimeInMillis(now);
@@ -44,12 +44,6 @@ public class DrawableTime extends DrawableItemCommon {
                 text = Integer.toString(calendar.get(Calendar.SECOND));
                 break;
         }
-        canvas.drawText(text, startX, startY, paint);
-
-    }
-
-    public int width()
-    {
-        return (int) paint.measureText("12");
+        return text;
     }
 }

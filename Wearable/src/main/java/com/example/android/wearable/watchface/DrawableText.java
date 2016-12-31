@@ -13,13 +13,8 @@ public class DrawableText extends DrawableItemCommon {
         text = GetRowItemString(rowIndex, itemIndex, "text_value");
     }
 
-    public void Draw(Canvas canvas, int startX, int startY)
+    public String GetText()
     {
-        canvas.drawText(text, startX, startY, paint);
-    }
-
-    public int width()
-    {
-        return (int) paint.measureText(text);
+        return text;
     }
 }

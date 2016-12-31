@@ -53,7 +53,9 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
         for (String key : dataMap.keySet())
         {
             Object value = dataMap.get(key);
-            if (value instanceof String)
+            if (value == null)
+                prefs.remove(key);
+            else if (value instanceof String)
                 prefs.putString(key, (String)value);
             else
                 Log.e(TAG, "Unsupported setting type");

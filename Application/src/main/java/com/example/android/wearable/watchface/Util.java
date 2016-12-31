@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 class Util {
@@ -42,19 +43,24 @@ class Util {
         return max;
     }
 
-    public static void DeleteRowItem(Context context, int rowNum, int itemNum)
+    public static HashSet<String> DeleteRowItem(Context context, int rowNum, int itemNum)
     {
         ArrayList<Integer> rowItems = GetRowItems(context, rowNum);
+        HashSet<String> keys = new HashSet<String>();
         rowItems.remove(rowItems.indexOf(itemNum));
         SaveRowItems(context, rowNum, rowItems);
+        keys.add("row_" + rowNum + "_items");
 
         Set<String> prefKeys = PreferenceManager.getDefaultSharedPreferences(context).getAll().keySet();
         SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
         for (String key : prefKeys)
-            if (key.startsWith("row_" + rowNum + "_item_" + itemNum))
+            if (key.startsWith("row_" + rowNum + "_item_" + itemNum)) {
                 preferences.remove(key);
+                keys.add(key);
+            }
 
         preferences.commit();
+        return keys;
     }
 
     public static String GetRowItemType(Context context, int rowNum, int itemNum)

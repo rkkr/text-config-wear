@@ -21,8 +21,8 @@
         <item>Text</item>
     </string-array>
     <string-array name="font_size" >
-        <item>10</item>
         <item>20</item>
+        <item>30</item>
         <item>40</item>
         <item>50</item>
         <item>60</item>
@@ -40,8 +40,8 @@
         <item>Black</item>
     </string-array>
     <string-array name="time_item" >
-        <item>Hour (12H)</item>
         <item>Hour (24H)</item>
+        <item>Hour (12H)</item>
         <item>AM/PM</item>
         <item>Minute</item>
         <item>Second</item>

@@ -13,43 +13,55 @@ public class DrawableDate extends DrawableItemCommon {
     public DrawableDate(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "time_item");
+        timeItem = GetRowItemString(rowIndex, itemIndex, "item");
 
         calendar = Calendar.getInstance();
     }
 
-    public void Draw(Canvas canvas, int startX, int startY)
+    public String GetText()
     {
         long now = System.currentTimeMillis();
         calendar.setTimeInMillis(now);
-        //if (mAmbient)
-        //    mCalendar.set(Calendar.SECOND, 0);
 
         String text = "";
-        switch (timeItem)
-        {
-            case "Hour (12H)":
-                text = Integer.toString(calendar.get(Calendar.HOUR));
+        switch (timeItem) {
+            case "Year (YYYY)":
+                text = Integer.toString(calendar.get(Calendar.YEAR));
                 break;
-            case "Hour (24H)":
-                text = Integer.toString(calendar.get(Calendar.HOUR_OF_DAY));
+            case "Year (YY)":
+                text = Integer.toString(calendar.get(Calendar.YEAR) % 100);
                 break;
-            case "AM/PM":
-                text = (int)calendar.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM";
+            case "Month":
+                text = Integer.toString(calendar.get(Calendar.MONTH));
                 break;
-            case "Minute":
-                text = Integer.toString(calendar.get(Calendar.MINUTE));
+            case "Day of Month":
+                text = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
                 break;
-            case "Second":
-                text = Integer.toString(calendar.get(Calendar.SECOND));
+            case "Weekday":
+                text = WeekdayToString(calendar.get(Calendar.DAY_OF_WEEK));
                 break;
         }
-        canvas.drawText(text, startX, startY, paint);
-
+        return text;
     }
 
-    public int width()
+    private String WeekdayToString(int weekday)
     {
-        return (int) paint.measureText("12");
+        switch (weekday) {
+            case Calendar.MONDAY:
+                return "Monday";
+            case Calendar.TUESDAY:
+                return "Tuesday";
+            case Calendar.WEDNESDAY:
+                return "Wednesday";
+            case Calendar.THURSDAY:
+                return "Thursday";
+            case Calendar.FRIDAY:
+                return "Friday";
+            case Calendar.SATURDAY:
+                return "Saturday";
+            case Calendar.SUNDAY:
+                return "Sunday";
+        }
+        return "";
     }
 }

@@ -1,6 +1,7 @@
 package com.example.android.wearable.watchface;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.preference.PreferenceManager;
@@ -27,6 +28,16 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     public int height()
     {
         return height;
+    }
+
+    public int width()
+    {
+        return (int) paint.measureText(GetText());
+    }
+
+    public void Draw(Canvas canvas, int startX, int startY)
+    {
+        canvas.drawText(GetText(), startX, startY, paint);
     }
 
     public String GetRowItemString(int rowNum, int itemNum, String key)

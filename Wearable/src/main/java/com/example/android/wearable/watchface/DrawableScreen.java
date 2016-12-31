@@ -21,7 +21,7 @@ public class DrawableScreen {
         this.context = context;
 
         rows = new ArrayList<DrawableRow>();
-        for (int i=1; i<=2; i++) //5 rows hardcoded for now
+        for (int i=1; i<=5; i++) //5 rows hardcoded for now
             rows.add(new DrawableRow(context, i));
 
         totalHeight = 0;
@@ -38,9 +38,9 @@ public class DrawableScreen {
         int startY = (bounds.height() - totalHeight) / 2;
         for (DrawableRow row : rows)
         {
+            startY += row.height;
             int startX = (bounds.width() - row.width()) / 2;
             row.Draw(canvas, startX, startY);
-            startY += row.height;
         }
     }
 

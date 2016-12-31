@@ -1,6 +1,9 @@
 package com.example.android.wearable.watchface;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+
+import java.util.HashSet;
 
 public class SettingsTextActivity extends SettingsItemCommon {
     @Override
@@ -20,6 +23,15 @@ public class SettingsTextActivity extends SettingsItemCommon {
 
             AddEditTextPreference("Text", "text_value");
 
+        }
+
+        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)
+        {
+            HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, rowNum, itemNum);
+            keys.add("row_" + rowNum + "_item_" + itemNum + "_text_value");
+            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_text_value", "Text");
+
+            return keys;
         }
     }
 }

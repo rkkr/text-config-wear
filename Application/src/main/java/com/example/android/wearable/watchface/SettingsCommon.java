@@ -34,6 +34,8 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.HashSet;
+
 
 public class SettingsCommon extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -137,19 +139,42 @@ public class SettingsCommon extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        try {
-            Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
-        } catch (Exception e) {
-            return;
+        DataMap config = new DataMap();
+        if (!sharedPreferences.contains(key)) {
+            config.putString(key, null);
+        } else {
+            try {
+                Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
+            } catch (Exception e) {
+                return;
+            }
         }
 
-        sendConfigUpdateMessage(key, sharedPreferences.getString(key, ""));
+        config.putString(key, sharedPreferences.getString(key, ""));
+        sendConfigUpdateMessage(config);
     }
 
-    private void sendConfigUpdateMessage(String key, String value) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, HashSet<String> keys) {
+        DataMap config = new DataMap();
+
+        for (String key : keys) {
+            if (!sharedPreferences.contains(key)) {
+                config.putString(key, null);
+                continue;
+            }
+
+            try {
+                Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
+                config.putString(key, sharedPreferences.getString(key, ""));
+            } catch (Exception e) {
+            }
+        }
+
+        sendConfigUpdateMessage(config);
+    }
+
+    private void sendConfigUpdateMessage(DataMap config) {
         if (mPeerId != null) {
-            DataMap config = new DataMap();
-            config.putString(key, value);
             byte[] rawData = config.toByteArray();
             Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                 @Override

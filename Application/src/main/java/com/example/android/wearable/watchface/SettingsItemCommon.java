@@ -2,8 +2,11 @@ package com.example.android.wearable.watchface;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.HashSet;
 
 public class SettingsItemCommon extends SettingsCommon {
 
@@ -28,7 +31,9 @@ public class SettingsItemCommon extends SettingsCommon {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_action_delete) {
-            Util.DeleteRowItem(getApplicationContext(), rowNum, itemNum);
+            PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+            HashSet<String> keys = Util.DeleteRowItem(getApplicationContext(), rowNum, itemNum);
+            onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(this), keys);
             finish();
             return true;
         }
