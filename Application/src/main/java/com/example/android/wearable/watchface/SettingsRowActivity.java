@@ -1,17 +1,12 @@
 package com.example.android.wearable.watchface;
 
-import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -38,11 +33,17 @@ public class SettingsRowActivity extends SettingsCommon {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.pref_row_content);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
 
             PreferenceScreen screen = this.getPreferenceScreen();
 
             ArrayList<Integer> rowItems = Util.GetRowItems(screen.getContext(), rowNum);
             PreferenceCategory category = (PreferenceCategory)findPreference("row_items");
+            category.removeAll();
 
             for (Integer item : rowItems)
             {

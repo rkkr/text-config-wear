@@ -19,8 +19,6 @@ public class MainActivity extends SettingsCommon {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-
-        setupActionBar();
     }
 
     public static class PreferencesFragment extends PreferenceFragment {
@@ -44,13 +42,6 @@ public class MainActivity extends SettingsCommon {
                     }
                 });
             }
-        }
-    }
-
-    private void setupActionBar() {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 }
