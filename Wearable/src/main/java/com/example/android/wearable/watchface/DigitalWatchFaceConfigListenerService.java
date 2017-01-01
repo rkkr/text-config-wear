@@ -57,6 +57,10 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
                 prefs.remove(key);
             else if (value instanceof String)
                 prefs.putString(key, (String)value);
+            else if (value instanceof Integer)
+                prefs.putInt(key, (Integer) value);
+            else if (value instanceof Boolean)
+                prefs.putBoolean(key, (Boolean) value);
             else
                 Log.e(TAG, "Unsupported setting type");
         }

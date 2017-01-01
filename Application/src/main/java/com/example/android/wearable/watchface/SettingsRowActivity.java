@@ -1,11 +1,10 @@
 package com.example.android.wearable.watchface;
 
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
@@ -17,7 +16,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashSet;
 
 public class SettingsRowActivity extends SettingsCommon {
@@ -136,7 +134,6 @@ public class SettingsRowActivity extends SettingsCommon {
             TextView textButton = (TextView) findViewById(R.id.settings_fab_text);
             float scale = getResources().getDisplayMetrics().density;
 
-
             fab.setRotation(0.0F);
             timeButton.setAlpha(0);
             timeButton.setY(175 * scale + timeButton.getY());
@@ -148,7 +145,6 @@ public class SettingsRowActivity extends SettingsCommon {
             dateButton.setClickable(false);
             textButton.setClickable(false);
         }
-
     }
 
     public static class PreferencesFragment extends PreferenceFragment {
@@ -158,6 +154,31 @@ public class SettingsRowActivity extends SettingsCommon {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.pref_row_content);
+
+            PreferenceScreen screen = this.getPreferenceScreen();
+            PreferenceCategory category = (PreferenceCategory)findPreference("row_general");
+
+            ListPreference alignmentPref = new ListPreference(screen.getContext());
+            alignmentPref.setKey("row_" + rowNum + "_align");
+            alignmentPref.setEntryValues(R.array.align_modes);
+            alignmentPref.setEntries(R.array.align_modes);
+            alignmentPref.setTitle("Alignment");
+            alignmentPref.setDefaultValue("Center");
+            category.addPreference(alignmentPref);
+
+            Preference paddingPref = new Preference(screen.getContext());
+            paddingPref.setTitle("Padding");
+            paddingPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    FragmentManager fm = getFragmentManager();
+                    RowPaddingPickerActivity editPaddingDialog = new RowPaddingPickerActivity();
+                    editPaddingDialog.rowNum = rowNum;
+                    editPaddingDialog.show(fm, "pref_padding_picker");
+                    return true;
+                }
+            });
+            category.addPreference(paddingPref);
         }
 
         @Override

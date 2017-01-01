@@ -35,6 +35,7 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.HashSet;
+import java.util.Map;
 
 
 public class SettingsCommon extends AppCompatActivity
@@ -139,19 +140,9 @@ public class SettingsCommon extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        DataMap config = new DataMap();
-        if (!sharedPreferences.contains(key)) {
-            config.putString(key, null);
-        } else {
-            try {
-                Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
-            } catch (Exception e) {
-                return;
-            }
-        }
-
-        config.putString(key, sharedPreferences.getString(key, ""));
-        sendConfigUpdateMessage(config);
+        HashSet<String> keys = new HashSet<>();
+        keys.add(key);
+        onSharedPreferenceChanged(sharedPreferences, keys);
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, HashSet<String> keys) {
@@ -163,14 +154,19 @@ public class SettingsCommon extends AppCompatActivity
                 continue;
             }
 
-            try {
-                Log.d("Settings", key + " = " + sharedPreferences.getString(key, ""));
+            Object pref = sharedPreferences.getAll().get(key);
+            if (pref instanceof String)
                 config.putString(key, sharedPreferences.getString(key, ""));
-            } catch (Exception e) {
-            }
+            else if (pref instanceof Boolean)
+                config.putBoolean(key, sharedPreferences.getBoolean(key, false));
+            else if (pref instanceof Integer)
+                config.putInt(key, sharedPreferences.getInt(key, 0));
+            else
+                Log.e("Settings", key + " unsupported type");
         }
 
-        sendConfigUpdateMessage(config);
+        if (config.size() > 0)
+            sendConfigUpdateMessage(config);
     }
 
     private void sendConfigUpdateMessage(DataMap config) {

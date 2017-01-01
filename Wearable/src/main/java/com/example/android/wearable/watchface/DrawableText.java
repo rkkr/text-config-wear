@@ -1,7 +1,6 @@
 package com.example.android.wearable.watchface;
 
 import android.content.Context;
-import android.graphics.Canvas;
 
 public class DrawableText extends DrawableItemCommon {
 
@@ -13,7 +12,7 @@ public class DrawableText extends DrawableItemCommon {
         text = GetRowItemString(rowIndex, itemIndex, "text_value");
     }
 
-    public String GetText()
+    public String GetText(boolean ambient)
     {
         return text;
     }

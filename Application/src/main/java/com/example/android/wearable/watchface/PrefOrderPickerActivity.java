@@ -19,7 +19,6 @@ public class PrefOrderPickerActivity extends DialogFragment {
     public PrefOrderPickerActivity() {
     }
 
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 

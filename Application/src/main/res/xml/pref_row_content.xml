@@ -1,11 +1,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:defaultValue="1"
-        android:title="Alignment"
-        android:entries="@array/align_modes"
-        android:entryValues="@array/align_modes"
-        android:key="row1_align_mode_preference"/>
+    <PreferenceCategory
+        android:title="General"
+        android:key="row_general">
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:title="Items"

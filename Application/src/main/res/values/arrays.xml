@@ -49,8 +49,11 @@
     <string-array name="date_item" >
         <item>Year (YYYY)</item>
         <item>Year (YY)</item>
-        <item>Month</item>
+        <item>Month (Number)</item>
+        <item>Month (Text)</item>
+        <item>Month (Text Short)</item>
         <item>Day of Month</item>
         <item>Weekday</item>
+        <item>Weekday (Short)</item>
     </string-array>
 </resources>

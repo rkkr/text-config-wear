@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class DrawableTime extends DrawableItemCommon {
 
@@ -18,12 +19,13 @@ public class DrawableTime extends DrawableItemCommon {
         calendar = Calendar.getInstance();
     }
 
-    public String GetText()
+    public String GetText(boolean ambient)
     {
         long now = System.currentTimeMillis();
         calendar.setTimeInMillis(now);
-        //if (mAmbient)
-        //    mCalendar.set(Calendar.SECOND, 0);
+        calendar.setTimeZone(TimeZone.getDefault());
+        if (ambient)
+            calendar.set(Calendar.SECOND, 0);
 
         String text = "";
         switch (timeItem)
@@ -38,10 +40,10 @@ public class DrawableTime extends DrawableItemCommon {
                 text = (int)calendar.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM";
                 break;
             case "Minute":
-                text = Integer.toString(calendar.get(Calendar.MINUTE));
+                text = String.format("%02d", calendar.get(Calendar.MINUTE));
                 break;
             case "Second":
-                text = Integer.toString(calendar.get(Calendar.SECOND));
+                text = String.format("%02d", calendar.get(Calendar.SECOND));
                 break;
         }
         return text;

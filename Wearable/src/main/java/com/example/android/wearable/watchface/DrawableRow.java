@@ -10,9 +10,14 @@ import java.util.ArrayList;
 
 public class DrawableRow {
 
-    int height;
-    ArrayList<IDrawableItem> drawableItems;
+    private int height;
+    private int paddingTop;
+    private int paddingLeft;
+    private int paddingRight;
+    private int paddingBottom;
+    private ArrayList<IDrawableItem> drawableItems;
     private Context context;
+    public String alignment;
 
     public DrawableRow(Context context, int rowIndex)
     {
@@ -42,23 +47,35 @@ public class DrawableRow {
         for(IDrawableItem item : drawableItems)
             if (height < item.height())
                 height = item.height();
+        paddingTop = Integer.parseInt(GetRowString(rowIndex, "padding_top", "0"));
+        paddingLeft = Integer.parseInt(GetRowString(rowIndex, "padding_left", "0"));
+        paddingRight = Integer.parseInt(GetRowString(rowIndex, "padding_right", "0"));
+        paddingBottom = Integer.parseInt(GetRowString(rowIndex, "padding_bottom", "0"));
+        alignment = GetRowString(rowIndex, "align", "Center");
     }
 
-    public void Draw(Canvas canvas, int startX, int startY)
+    public void Draw(Canvas canvas, int startX, int startY, boolean interactive, boolean lowBit)
     {
+        startX += paddingLeft;
+        startY -= paddingBottom;
         for(IDrawableItem item : drawableItems)
         {
-            item.Draw(canvas, startX, startY);
+            item.Draw(canvas, startX, startY, interactive, lowBit);
             startX += item.width();
         }
     }
 
     public int width()
     {
-        int width = 0;
+        int width = paddingLeft + paddingRight;
         for(IDrawableItem item : drawableItems)
             width += item.width();
         return width;
+    }
+
+    public int height()
+    {
+        return height + paddingBottom + paddingTop;
     }
 
     private ArrayList<Integer> GetRowItems(int rowNum)
@@ -74,5 +91,15 @@ public class DrawableRow {
     private String GetRowItemType(int rowNum, int itemNum)
     {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_type", "");
+    }
+
+    public String GetRowString(int rowNum, String key)
+    {
+        return GetRowString(rowNum, key, "");
+    }
+
+    public String GetRowString(int rowNum, String key, String defaultValue)
+    {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_" + key, defaultValue);
     }
 }
