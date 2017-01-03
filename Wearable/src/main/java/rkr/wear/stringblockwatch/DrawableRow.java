@@ -93,11 +93,6 @@ public class DrawableRow {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_type", "");
     }
 
-    public String GetRowString(int rowNum, String key)
-    {
-        return GetRowString(rowNum, key, "");
-    }
-
     public String GetRowString(int rowNum, String key, String defaultValue)
     {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_" + key, defaultValue);

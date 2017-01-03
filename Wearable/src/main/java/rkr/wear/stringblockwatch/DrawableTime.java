@@ -14,7 +14,7 @@ public class DrawableTime extends DrawableItemCommon {
     public DrawableTime(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "item");
+        timeItem = GetRowItemString(rowIndex, itemIndex, "item", "Hour (24H)");
 
         calendar = Calendar.getInstance();
     }

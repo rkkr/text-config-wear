@@ -13,7 +13,7 @@ public class DrawableDate extends DrawableItemCommon {
     public DrawableDate(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "item");
+        timeItem = GetRowItemString(rowIndex, itemIndex, "item", "Year (YYYY)");
 
         calendar = Calendar.getInstance();
     }

@@ -26,6 +26,9 @@
         <item>40</item>
         <item>50</item>
         <item>60</item>
+        <item>80</item>
+        <item>100</item>
+        <item>150</item>
     </string-array>
     <string-array name="font_type" >
         <item>Bold</item>
@@ -37,6 +40,10 @@
         <item>Red</item>
         <item>Blue</item>
         <item>Green</item>
+        <item>Yellow</item>
+        <item>Cyan</item>
+        <item>Magenta</item>
+        <item>Gray</item>
         <item>Black</item>
     </string-array>
     <string-array name="time_item" >

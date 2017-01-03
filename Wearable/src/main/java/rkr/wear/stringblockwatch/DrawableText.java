@@ -9,7 +9,7 @@ public class DrawableText extends DrawableItemCommon {
     public DrawableText(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        text = GetRowItemString(rowIndex, itemIndex, "text_value");
+        text = GetRowItemString(rowIndex, itemIndex, "text_value", "Text");
     }
 
     public String GetText(boolean ambient)

@@ -51,10 +51,10 @@ public class RowPaddingPickerActivity extends DialogFragment {
         topList.setWrapSelectorWheel(false);
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        final int leftListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_left", "0"));
-        final int bottomListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_bottom", "0"));
-        final int rightListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_right", "0"));
-        final int topListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_top", "0"));
+        final int leftListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_left", "10"));
+        final int bottomListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_bottom", "10"));
+        final int rightListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_right", "10"));
+        final int topListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_top", "10"));
 
         leftList.setValue(leftListValue);
         bottomList.setValue(bottomListValue);

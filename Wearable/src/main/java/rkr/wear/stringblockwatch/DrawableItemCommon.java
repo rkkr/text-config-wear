@@ -18,7 +18,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     public DrawableItemCommon(Context context, int rowIndex, int itemIndex)
     {
         this.context = context;
-        color = Color.parseColor(GetRowItemString(rowIndex, itemIndex, "text_color"));
+        color = Color.parseColor(GetRowItemString(rowIndex, itemIndex, "text_color", "White"));
         switch (PreferenceManager.getDefaultSharedPreferences(context).getString("idle_mode_color", "White")) {
             case "White":
                 colorAmbient = Color.WHITE;
@@ -31,9 +31,8 @@ public abstract class DrawableItemCommon implements IDrawableItem {
                 colorAmbient = Color.rgb(avg, avg, avg);
                 break;
         }
-        String size = GetRowItemString(rowIndex, itemIndex, "text_size");
-        hideIdle = GetRowItemBoolean(rowIndex, itemIndex, "hide_idle");
-        height = Integer.parseInt(size);
+        hideIdle = GetRowItemBoolean(rowIndex, itemIndex, "hide_idle", false);
+        height = Integer.parseInt(GetRowItemString(rowIndex, itemIndex, "text_size", "40"));
 
         paint = new Paint();
         paint.setTextSize(height);
@@ -59,13 +58,18 @@ public abstract class DrawableItemCommon implements IDrawableItem {
         canvas.drawText(GetText(ambient), startX, startY, paint);
     }
 
-    public String GetRowItemString(int rowNum, int itemNum, String key)
+    public String GetRowItemString(int rowNum, int itemNum, String key, String defaultValue)
     {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_" + key, "");
+        return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_" + key, defaultValue);
     }
 
-    public boolean GetRowItemBoolean(int rowNum, int itemNum, String key)
+    public int GetRowItemInt(int rowNum, int itemNum, String key, int defaultValue)
     {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("row_" + rowNum + "_item_" + itemNum + "_" + key, false);
+        return PreferenceManager.getDefaultSharedPreferences(context).getInt("row_" + rowNum + "_item_" + itemNum + "_" + key, defaultValue);
+    }
+
+    public boolean GetRowItemBoolean(int rowNum, int itemNum, String key, boolean defaultValue)
+    {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("row_" + rowNum + "_item_" + itemNum + "_" + key, defaultValue);
     }
 }
