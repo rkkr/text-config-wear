@@ -9,38 +9,15 @@
         android:entryValues="@array/font_color"
         android:key="wallpaper_color"
         android:summary="Select wallpaper" />
-    <ListPreference
-        android:defaultValue="1"
-        android:title="Idle Mode"
-        android:entries="@array/idle_modes"
-        android:entryValues="@array/idle_modes"
-        android:key="idle_mode_color"
-        android:summary="Select how text is displayed when watch is in idle mode" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Screen Configuration" >
-        <Preference
-            android:title="Row 1"
-            android:key="row1_preference">
-        </Preference>
-        <Preference
-            android:title="Row 2"
-            android:key="row2_preference">
-        </Preference>
-        <Preference
-            android:title="Row 3"
-            android:key="row3_preference">
-        </Preference>
-        <Preference
-            android:title="Row 4"
-            android:key="row4_preference">
-        </Preference>
-        <Preference
-            android:title="Row 5"
-            android:key="row5_preference">
-        </Preference>
+    <Preference
+        android:title="Advanced Settings"
+        android:key="advanced" />
 
+    <PreferenceCategory
+        android:title="Screen Rows"
+        android:key="rows" >
     </PreferenceCategory>
 
 </PreferenceScreen>
