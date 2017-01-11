@@ -1,12 +1,22 @@
 package rkr.wear.stringblockwatch;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.preference.PreferenceManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class DrawableScreen {
 
@@ -17,6 +27,11 @@ public class DrawableScreen {
 
     public DrawableScreen(Context context)
     {
+        if (!PreferenceManager.getDefaultSharedPreferences(context).contains("rows")) {
+            //We are started for the first time or app settings have been cleared
+            ImportWatch(context.getResources().openRawResource(R.raw.watch_sample1), context);
+        }
+
         this.context = context;
         drawableRows = new ArrayList<DrawableRow>();
         ArrayList<Integer> rows = GetRows();
@@ -71,5 +86,46 @@ public class DrawableScreen {
             for (String item: rowItems.split(","))
                 list.add(Integer.parseInt(item));
         return list;
+    }
+
+    private void ImportWatch(InputStream inputStream, Context context)
+    {
+        final int bufferSize = 1024;
+        final char[] buffer = new char[bufferSize];
+        final StringBuilder out = new StringBuilder();
+
+        try {
+            for (Reader in = new InputStreamReader(inputStream, "UTF-8");; ) {
+                int rsz = in.read(buffer, 0, buffer.length);
+                if (rsz < 0)
+                    break;
+                out.append(buffer, 0, rsz);
+            }
+
+            String contents = out.toString();
+            JSONObject jObject = new JSONObject(contents);
+
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+            editor.clear();
+
+            for (Iterator<String> key = jObject.keys(); key.hasNext(); ) {
+                String _key = key.next();
+                Object value = jObject.get(_key);
+
+                editor.putString(_key, (String)value);
+            }
+
+            editor.commit();
+            //Intent intent = new Intent("string.block.watch.FORCE_SYNC");
+            //context.sendBroadcast(intent);
+        }
+        catch (UnsupportedEncodingException e) {
+            //Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            //Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show();
+        } catch (JSONException e) {
+            //Toast.makeText(context, "Failed to parse file", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

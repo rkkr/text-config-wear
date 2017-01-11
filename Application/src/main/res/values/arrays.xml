@@ -63,4 +63,10 @@
         <item>Weekday</item>
         <item>Weekday (Short)</item>
     </string-array>
+    <string-array name="watch_actions" >
+        <item>Import</item>
+        <item>Overwrite</item>
+        <item>Rename</item>
+        <item>Delete</item>
+    </string-array>
 </resources>

@@ -1,0 +1,17 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Saved configurations"
+        android:key="watches_saved">
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Sample configurations" >
+        <Preference
+            android:title="Simple"
+            android:key="watch_sample_1"
+            android:summary="Simple date and time" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

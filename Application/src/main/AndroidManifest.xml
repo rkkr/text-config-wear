@@ -20,67 +20,58 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Location permission used by FitDistanceWatchFaceService -->
-    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-
-    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
+    <!--
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat">
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="rkr.wear.stringblockwatch.CONFIG_DIGITAL" />
+
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".AdvancedActivity">
+        <activity android:name=".AdvancedActivity">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".SettingsRowActivity">
+        <activity android:name=".SettingsRowActivity">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".SettingsTextActivity">
+        <activity android:name=".SettingsTextActivity">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".SettingsTimeActivity">
+        <activity android:name=".SettingsTimeActivity">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".SettingsDateActivity">
+        <activity android:name=".SettingsDateActivity">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".ImportActivity"></activity>
     </application>
 
 </manifest>

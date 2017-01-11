@@ -9,6 +9,11 @@
         android:entryValues="@array/font_color"
         android:key="wallpaper_color"
         android:summary="Select wallpaper" />
+
+        <Preference
+            android:title="Sample watches"
+            android:summary="Import a sample configuration"
+            android:key="import" />
     </PreferenceCategory>
 
     <Preference

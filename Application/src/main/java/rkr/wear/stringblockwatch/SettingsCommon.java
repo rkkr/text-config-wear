@@ -17,8 +17,11 @@
 package rkr.wear.stringblockwatch;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -79,6 +82,7 @@ public class SettingsCommon extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        registerReceiver(syncSend, new IntentFilter("string.block.watch.FORCE_SYNC"));
     }
 
     @Override
@@ -86,6 +90,7 @@ public class SettingsCommon extends AppCompatActivity
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
+        unregisterReceiver(syncSend);
         super.onStop();
     }
 
@@ -100,6 +105,15 @@ public class SettingsCommon extends AppCompatActivity
         super.onPause();
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
+
+    BroadcastReceiver syncSend = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            Set<String> keys = prefs.getAll().keySet();
+            onSharedPreferenceChanged(prefs, keys);
+        }
+    };
 
     @Override
     public void onConnected(Bundle connectionHint) {

@@ -42,6 +42,11 @@ public class MainActivity extends SettingsCommon {
                 onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(view.getContext()), keys);
             }
         });
+
+        if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).contains("rows")) {
+            //We are started for the first time or app settings have been cleared
+            ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext());
+        }
     }
 
     public static class PreferencesFragment extends PreferenceFragment {
@@ -68,6 +73,16 @@ public class MainActivity extends SettingsCommon {
             super.onResume();
 
             PreferenceScreen screen = this.getPreferenceScreen();
+
+            Preference importSample = findPreference("import");
+            importSample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getView().getContext(), ImportActivity.class);
+                    getView().getContext().startActivity(intent);
+                    return true;
+                }
+            });
 
             ArrayList<Integer> rows = Util.GetRows(getView().getContext());
             PreferenceCategory category = (PreferenceCategory)findPreference("rows");

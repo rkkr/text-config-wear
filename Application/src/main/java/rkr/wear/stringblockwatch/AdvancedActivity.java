@@ -28,25 +28,14 @@ public class AdvancedActivity extends SettingsCommon {
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
 
-        registerReceiver(syncSend, new IntentFilter("string.block.watch.FORCE_SYNC"));
         registerReceiver(syncCallback, new IntentFilter("string.block.watch.SYNCED"));
     }
 
     @Override
     protected void onDestroy () {
-        unregisterReceiver(syncSend);
         unregisterReceiver(syncCallback);
         super.onDestroy();
     }
-
-    BroadcastReceiver syncSend = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            Set<String> keys = prefs.getAll().keySet();
-            onSharedPreferenceChanged(prefs, keys);
-        }
-    };
 
     BroadcastReceiver syncCallback = new BroadcastReceiver() {
         @Override
