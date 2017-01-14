@@ -41,37 +41,49 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".AdvancedActivity">
+        <activity
+            android:name=".AdvancedActivity"
+            android:label="Advanced Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsRowActivity">
+        <activity
+            android:name=".SettingsRowActivity"
+            android:label="Row %d Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsTextActivity">
+        <activity
+            android:name=".SettingsTextActivity"
+            android:label="Text Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsTimeActivity">
+        <activity
+            android:name=".SettingsTimeActivity"
+            android:label="Time Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsDateActivity">
+        <activity
+            android:name=".SettingsDateActivity"
+            android:label="Date Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".ImportActivity"></activity>
+        <activity
+            android:name=".ImportActivity"
+            android:label="Import and Export"/>
     </application>
 
 </manifest>

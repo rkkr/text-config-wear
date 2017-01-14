@@ -39,6 +39,10 @@ public class SettingsRowActivity extends SettingsCommon {
                .replace(R.id.fragment, new PreferencesFragment())
                .commit();
 
+        int rowIndex = Util.GetRows(getApplicationContext()).indexOf(rowNum) + 1;
+        assert getSupportActionBar() != null;
+        getSupportActionBar().setTitle(String.format(getSupportActionBar().getTitle().toString(), rowIndex));
+
         fabExpanded = false;
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.settings_fab);
         final TextView timeButton = (TextView) findViewById(R.id.settings_fab_time);
@@ -243,6 +247,9 @@ public class SettingsRowActivity extends SettingsCommon {
                 Preference pref = new Preference(screen.getContext());
                 String itemType = Util.GetRowItemType(screen.getContext(), rowNum, item);
                 pref.setTitle(itemType);
+                String itemValue = Util.GetRowItemValue(screen.getContext(), rowNum, item);
+                if (itemValue != null)
+                    pref.setSummary("{" + itemValue + "}");
                 final int itemNum = item;
                 final Class itemClass = Util.GetRowItemClass(itemType);
 

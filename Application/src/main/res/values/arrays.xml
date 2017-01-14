@@ -46,22 +46,41 @@
         <item>Gray</item>
         <item>Black</item>
     </string-array>
-    <string-array name="time_item" >
+    <string-array name="time_value" >
         <item>Hour (24H)</item>
         <item>Hour (12H)</item>
         <item>AM/PM</item>
         <item>Minute</item>
         <item>Second</item>
     </string-array>
+    <string-array name="time_display" >
+        <item>Number</item>
+        <item>Number with leading zeros</item>
+        <item>Word</item>
+    </string-array>
+    <string-array name="date_month_display" >
+        <item>Number</item>
+        <item>Number with leading zeros</item>
+        <item>Word Full</item>
+        <item>Word Short</item>
+    </string-array>
+    <string-array name="date_day_display" >
+        <item>Number</item>
+        <item>Number with leading zeros</item>
+        <item>Word</item>
+    </string-array>
+    <string-array name="date_weekday_display" >
+        <item>Word Full</item>
+        <item>Word Short</item>
+    </string-array>
     <string-array name="date_item" >
         <item>Year (YYYY)</item>
         <item>Year (YY)</item>
-        <item>Month (Number)</item>
-        <item>Month (Text)</item>
-        <item>Month (Text Short)</item>
-        <item>Day of Month</item>
+        <item>Month</item>
         <item>Weekday</item>
-        <item>Weekday (Short)</item>
+        <item>Day of Month</item>
+        <item>Day of Year</item>
+        <item>Week of Year</item>
     </string-array>
     <string-array name="watch_actions" >
         <item>Import</item>

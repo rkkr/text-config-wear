@@ -88,16 +88,24 @@ public class MainActivity extends SettingsCommon {
             PreferenceCategory category = (PreferenceCategory)findPreference("rows");
             category.removeAll();
 
-            for (final Integer item : rows)
+            for (final Integer row : rows)
             {
                 Preference pref = new Preference(screen.getContext());
-                pref.setTitle("Row");
+                pref.setTitle(String.format("Row %d", rows.indexOf(row) + 1));
+                String rowValue = "";
+                for (Integer rowItem : Util.GetRowItems(screen.getContext(), row)) {
+                    String itemValue = Util.GetRowItemValue(screen.getContext(), row, rowItem);
+                    if (itemValue != null)
+                        rowValue += "{" + itemValue + "}";
+                }
+                if (!rowValue.isEmpty())
+                    pref.setSummary(rowValue);
 
                 pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
                         Intent intent = new Intent(getView().getContext(), SettingsRowActivity.class);
-                        intent.putExtra("ROW_ID", item);
+                        intent.putExtra("ROW_ID", row);
                         getView().getContext().startActivity(intent);
                         return true;
                     }

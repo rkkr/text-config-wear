@@ -118,6 +118,11 @@ class Util {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_type", "");
     }
 
+    public static String GetRowItemValue(Context context, int rowNum, int itemNum)
+    {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_value", null);
+    }
+
     public static Class GetRowItemClass(String itemType)
     {
         switch (itemType)

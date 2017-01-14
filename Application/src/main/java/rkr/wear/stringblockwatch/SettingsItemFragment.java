@@ -86,7 +86,7 @@ public class SettingsItemFragment extends PreferenceFragment {
         category.addPreference(pref);
     }
 
-    public void AddListPreference(String title, String key, int resource)
+    public ListPreference AddListPreference(String title, String key, int resource)
     {
         ListPreference pref = new ListPreference(category.getContext());
         pref.setTitle(title);
@@ -94,6 +94,7 @@ public class SettingsItemFragment extends PreferenceFragment {
         pref.setEntries(resource);
         pref.setEntryValues(resource);
         category.addPreference(pref);
+        return pref;
     }
 
     public void AddMultiSelectListPreference(String title, String key, int resource)

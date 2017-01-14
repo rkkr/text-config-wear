@@ -187,6 +187,7 @@ public class ImportActivity extends SettingsCommon {
                 jObject.put(key, settings.get(key));
             }
             settingsJson = jObject.toString(2);
+            Log.d("Saving watch", settingsJson);
 
             File folder = new File(context.getFilesDir(), "saved_watches");
             if (!folder.exists())
@@ -256,11 +257,19 @@ public class ImportActivity extends SettingsCommon {
 
             addPreferencesFromResource(R.xml.pref_import);
 
-            Preference advanced = findPreference("watch_sample_1");
-            advanced.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            Preference sample = findPreference("watch_sample_1");
+            sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     ImportWatch(getResources().openRawResource(R.raw.watch_sample1), preference.getContext());
+                    return true;
+                }
+            });
+            sample = findPreference("watch_sample_2");
+            sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext());
                     return true;
                 }
             });

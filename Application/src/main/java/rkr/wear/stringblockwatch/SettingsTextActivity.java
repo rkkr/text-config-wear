@@ -21,15 +21,15 @@ public class SettingsTextActivity extends SettingsItemCommon {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState, rowNum, itemNum);
 
-            AddEditTextPreference("Text", "text_value");
+            AddEditTextPreference("Text", "value");
 
         }
 
         public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)
         {
             HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, rowNum, itemNum);
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_text_value");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_text_value", "Text");
+            keys.add("row_" + rowNum + "_item_" + itemNum + "_value");
+            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_value", "Text");
 
             return keys;
         }

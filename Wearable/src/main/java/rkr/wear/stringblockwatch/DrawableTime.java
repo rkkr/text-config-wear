@@ -8,13 +8,15 @@ import java.util.TimeZone;
 
 public class DrawableTime extends DrawableItemCommon {
 
-    private String timeItem;
+    private String timeValue;
+    private String timeFormat;
     private Calendar calendar;
 
     public DrawableTime(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "item", "Hour (24H)");
+        timeValue = GetRowItemString(rowIndex, itemIndex, "value", "Hour (24H)");
+        timeFormat = GetRowItemString(rowIndex, itemIndex, "format", "Number");
 
         calendar = Calendar.getInstance();
     }
@@ -27,25 +29,32 @@ public class DrawableTime extends DrawableItemCommon {
         if (ambient)
             calendar.set(Calendar.SECOND, 0);
 
-        String text = "";
-        switch (timeItem)
+        switch (timeValue)
         {
             case "Hour (12H)":
-                text = Integer.toString(calendar.get(Calendar.HOUR));
-                break;
+                return FormatNumber(calendar.get(Calendar.HOUR));
             case "Hour (24H)":
-                text = Integer.toString(calendar.get(Calendar.HOUR_OF_DAY));
-                break;
+                return FormatNumber(calendar.get(Calendar.HOUR_OF_DAY));
             case "AM/PM":
-                text = (int)calendar.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM";
-                break;
+                return  (int)calendar.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM";
             case "Minute":
-                text = String.format("%02d", calendar.get(Calendar.MINUTE));
-                break;
+                return FormatNumber(calendar.get(Calendar.MINUTE));
             case "Second":
-                text = String.format("%02d", calendar.get(Calendar.SECOND));
-                break;
+                return FormatNumber(calendar.get(Calendar.SECOND));
         }
-        return text;
+        return "";
+    }
+
+    private String FormatNumber(int number)
+    {
+        switch (timeFormat) {
+            case "Number":
+                return String.format("%d", number);
+            case "Number with leading zeros":
+                return String.format("%02d", number);
+            case "Word":
+                return NumberWordConverter.convert(number);
+        }
+        return "";
     }
 }

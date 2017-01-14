@@ -7,13 +7,15 @@ import java.util.Calendar;
 
 public class DrawableDate extends DrawableItemCommon {
 
-    private String timeItem;
+    private String dateValue;
+    private String dateFormat;
     private Calendar calendar;
 
     public DrawableDate(Context context, int rowIndex, int itemIndex)
     {
         super(context, rowIndex, itemIndex);
-        timeItem = GetRowItemString(rowIndex, itemIndex, "item", "Year (YYYY)");
+        dateValue = GetRowItemString(rowIndex, itemIndex, "value", "Year (YYYY)");
+        dateFormat = GetRowItemString(rowIndex, itemIndex, "format", "Number");
 
         calendar = Calendar.getInstance();
     }
@@ -23,34 +25,62 @@ public class DrawableDate extends DrawableItemCommon {
         long now = System.currentTimeMillis();
         calendar.setTimeInMillis(now);
 
-        String text = "";
-        switch (timeItem) {
+        switch (dateValue) {
             case "Year (YYYY)":
-                text = String.format("%d", calendar.get(Calendar.YEAR));
-                break;
+                return FormatNumber(calendar.get(Calendar.YEAR), 4);
             case "Year (YY)":
-                text = String.format("%02d", calendar.get(Calendar.YEAR) % 100);
-                break;
-            case "Month (Number)":
-                text = Integer.toString(calendar.get(Calendar.MONTH) + 1);
-                break;
-            case "Month (Text)":
-                text = MonthToString(calendar.get(Calendar.MONTH));
-                break;
-            case "Month (Text Short)":
-                text = MonthToString(calendar.get(Calendar.MONTH)).substring(0, 3);
-                break;
-            case "Day of Month":
-                text = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-                break;
+                return FormatNumber(calendar.get(Calendar.YEAR) % 100, 2);
+            case "Month":
+                return FormatMonth(calendar.get(Calendar.MONTH));
             case "Weekday":
-                text = WeekdayToString(calendar.get(Calendar.DAY_OF_WEEK));
-                break;
-            case "Weekday (Short)":
-                text = WeekdayToString(calendar.get(Calendar.DAY_OF_WEEK)).substring(0, 3);
-                break;
+                return FormatWeekday(calendar.get(Calendar.DAY_OF_WEEK));
+            case "Day of Month":
+                return FormatNumber(calendar.get(Calendar.DAY_OF_MONTH), 2);
+            case "Day of Year":
+                return FormatNumber(calendar.get(Calendar.DAY_OF_YEAR), 3);
+            case "Week of Year":
+                return FormatNumber(calendar.get(Calendar.WEEK_OF_YEAR), 2);
         }
-        return text;
+        return "";
+    }
+
+    private String FormatMonth(int number)
+    {
+        switch (dateFormat) {
+            case "Number":
+                return String.format("%d", number + 1);
+            case "Number with leading zeros":
+                return String.format("%02d", number + 1);
+            case "Word Full":
+                return MonthToString(number);
+            case "Word Short":
+                return MonthToString(number).substring(0, 3);
+        }
+        return "";
+    }
+
+    private String FormatNumber(int number, int leadingZeros)
+    {
+        switch (dateFormat) {
+            case "Number":
+                return String.format("%d", number);
+            case "Number with leading zeros":
+                return String.format("%0" + leadingZeros + "d", number);
+            case "Word":
+                return NumberWordConverter.convert(number);
+        }
+        return "";
+    }
+
+    private String FormatWeekday(int number)
+    {
+        switch (dateFormat) {
+            case "Word Full":
+                return WeekdayToString(number);
+            case "Word Short":
+                return WeekdayToString(number).substring(0, 3);
+        }
+        return "";
     }
 
     private String WeekdayToString(int weekday)
