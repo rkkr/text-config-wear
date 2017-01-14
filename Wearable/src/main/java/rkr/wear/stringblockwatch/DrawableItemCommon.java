@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +25,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     public DrawableItemCommon(Context context, int rowIndex, int itemIndex)
     {
         this.context = context;
-        color = Color.parseColor(GetRowItemString(rowIndex, itemIndex, "text_color", "White"));
+        color = GetRowItemColor(rowIndex, itemIndex, "text_color", Color.WHITE);
         switch (PreferenceManager.getDefaultSharedPreferences(context).getString("idle_mode_color", "White")) {
             case "White":
                 colorAmbient = Color.WHITE;
@@ -79,6 +80,17 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     public String GetRowItemString(int rowNum, int itemNum, String key, String defaultValue)
     {
         return PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_" + key, defaultValue);
+    }
+
+    public int GetRowItemColor(int rowNum, int itemNum, String key, int defaultValue)
+    {
+        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("row_" + rowNum + "_item_" + itemNum + "_" + key, "");
+        try {
+            return (int) Long.parseLong(text.replaceFirst("0x", ""), 16);
+        }
+        catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     public int GetRowItemInt(int rowNum, int itemNum, String key, int defaultValue)

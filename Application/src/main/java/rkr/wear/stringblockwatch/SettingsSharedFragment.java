@@ -51,11 +51,16 @@ public class SettingsSharedFragment extends PreferenceFragment implements Shared
 
     public ListPreference AddListPreference(PreferenceCategory category, String title, String key, int resource)
     {
+        return AddListPreference(category, title, key, resource, resource);
+    }
+
+    public ListPreference AddListPreference(PreferenceCategory category, String title, String key, int resource, int valueResource)
+    {
         ListPreference pref = new ListPreference(category.getContext());
         pref.setTitle(title);
         pref.setKey(key);
         pref.setEntries(resource);
-        pref.setEntryValues(resource);
+        pref.setEntryValues(valueResource);
         category.addPreference(pref);
         return pref;
     }

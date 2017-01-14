@@ -22,7 +22,7 @@ public class DrawableScreen {
 
     private ArrayList<DrawableRow> drawableRows;
     private int totalHeight;
-    private String color;
+    private int color;
     private Context context;
 
     public DrawableScreen(Context context)
@@ -42,7 +42,7 @@ public class DrawableScreen {
         for (DrawableRow drawableRow : drawableRows)
             totalHeight += drawableRow.height();
 
-        color = PreferenceManager.getDefaultSharedPreferences(context).getString("wallpaper_color", "Black");
+        color = GetScreenColor(Color.BLACK);
     }
 
     public void Draw(Canvas canvas, Rect bounds, boolean isRound, boolean ambient, boolean lowBit)
@@ -50,7 +50,7 @@ public class DrawableScreen {
         if (ambient)
             canvas.drawColor(Color.BLACK);
         else
-            canvas.drawColor(Color.parseColor(color));
+            canvas.drawColor(color);
 
         int startY = (bounds.height() - totalHeight) / 2;
         for (DrawableRow drawableRow : drawableRows)
@@ -86,6 +86,17 @@ public class DrawableScreen {
             for (String item: rowItems.split(","))
                 list.add(Integer.parseInt(item));
         return list;
+    }
+
+    public int GetScreenColor(int defaultValue)
+    {
+        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("wallpaper_color", "");
+        try {
+            return (int) Long.parseLong(text.replaceFirst("0x", ""), 16);
+        }
+        catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     private void ImportWatch(InputStream inputStream, Context context)

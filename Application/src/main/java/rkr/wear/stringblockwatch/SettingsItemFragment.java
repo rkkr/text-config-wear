@@ -60,7 +60,7 @@ public class SettingsItemFragment extends SettingsSharedFragment {
 
         AddListPreference(category, "Font Size", "text_size", R.array.font_size);
         AddMultiSelectListPreference(category, "Font Type", "text_font", R.array.font_type);
-        AddListPreference(category, "Font Color", "text_color", R.array.font_color);
+        AddListPreference(category, "Font Color", "text_color", R.array.font_color, R.array.font_color_value);
     }
 
     public Preference AddPreference(PreferenceCategory category, String title)
@@ -81,6 +81,11 @@ public class SettingsItemFragment extends SettingsSharedFragment {
     public ListPreference AddListPreference(PreferenceCategory category, String title, String key, int resource)
     {
         return super.AddListPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key, resource);
+    }
+
+    public ListPreference AddListPreference(PreferenceCategory category, String title, String key, int resource, int valueResource)
+    {
+        return super.AddListPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key, resource, valueResource);
     }
 
     public MultiSelectListPreference AddMultiSelectListPreference(PreferenceCategory category, String title, String key, int resource)

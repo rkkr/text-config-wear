@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,9 +30,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class ImportActivity extends SettingsCommon {
 
@@ -159,7 +163,15 @@ public class ImportActivity extends SettingsCommon {
                 String _key = key.next();
                 Object value = jObject.get(_key);
 
-                editor.putString(_key, (String)value);
+                if (value instanceof JSONArray) {
+                    JSONArray array = (JSONArray)value;
+                    HashSet<String> _value = new HashSet<String>();
+                    for (int i=0; i<array.length(); i++)
+                        _value.add(array.getString(i));
+                    editor.putStringSet(_key, _value);
+                } else {
+                    editor.putString(_key, (String) value);
+                }
             }
 
             editor.commit();
@@ -184,7 +196,13 @@ public class ImportActivity extends SettingsCommon {
             fileName = Base64.encodeToString(fileName.getBytes("UTF-8"), Base64.DEFAULT);
 
             for (String key : settings.keySet()) {
-                jObject.put(key, settings.get(key));
+                Object item = settings.get(key);
+                if (item instanceof Set) {
+                    JSONArray array = new JSONArray((Set<String>) item);
+                    jObject.put(key, array);
+                } else {
+                    jObject.put(key, item);
+                }
             }
             settingsJson = jObject.toString(2);
             Log.d("Saving watch", settingsJson);

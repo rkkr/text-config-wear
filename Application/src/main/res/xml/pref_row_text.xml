@@ -20,9 +20,10 @@
         android:key="_text_font" />
 
     <ListPreference
+        android:defaultValue="0xFFFFFFFF"
         android:title="Font Color"
         android:entries="@array/font_color"
-        android:entryValues="@array/font_color"
+        android:entryValues="@array/font_color_value"
         android:key="_text_color" />
 
 </PreferenceScreen>

@@ -205,8 +205,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         private void updateUiForConfig() {
             drawableScreen = new DrawableScreen(getApplicationContext());
 
+            String lockTag = "WatchFaceWakelockTag_" + System.currentTimeMillis();
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "WatchFaceWakelockTag");
+            final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), lockTag);
 
             mWakeLock.acquire();
             Handler mWakeLockHandler = new Handler();

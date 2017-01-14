@@ -3,10 +3,10 @@
         android:title="General Settings" >
 
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="0xFFFFFFFF"
         android:title="Wallpaper Color"
         android:entries="@array/font_color"
-        android:entryValues="@array/font_color"
+        android:entryValues="@array/font_color_value"
         android:key="wallpaper_color" />
 
         <Preference
