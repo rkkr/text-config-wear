@@ -174,6 +174,12 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         }
 
         @Override
+        public void onPeekCardPositionUpdate(Rect rect) {
+            super.onPeekCardPositionUpdate(rect);
+            invalidate();
+        }
+
+        @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             Rect previewCard = getPeekCardPosition();
 
