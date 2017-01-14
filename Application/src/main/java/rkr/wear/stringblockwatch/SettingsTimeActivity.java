@@ -23,8 +23,8 @@ public class SettingsTimeActivity extends SettingsItemCommon {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState, rowNum, itemNum);
 
-            ListPreference valuePref = AddListPreference("Time value", "value", R.array.time_value);
-            final ListPreference formatPref = AddListPreference("Display format", "format", R.array.time_display);
+            ListPreference valuePref = AddListPreference(defaultCategory, "Time value", "value", R.array.time_value);
+            final ListPreference formatPref = AddListPreference(defaultCategory, "Display format", "format", R.array.time_display);
             valuePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {

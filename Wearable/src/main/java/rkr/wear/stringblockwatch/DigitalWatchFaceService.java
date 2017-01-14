@@ -21,16 +21,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
+
+import java.util.HashSet;
 
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
@@ -80,19 +85,26 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         boolean mLowBitAmbient;
         boolean mIsRound;
         boolean mIsAmbient;
+        String peekCardMode;
+        Paint blackPaint;
         DrawableScreen drawableScreen;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
+            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
-                    .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
+                    .setAcceptsTapEvents(false)
+                    .setCardPeekMode(peekCardMode.equals("Hidden") ? WatchFaceStyle.PEEK_MODE_NONE : WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_OPAQUE)
                     .setShowSystemUiTime(false)
                     .build());
 
             drawableScreen = new DrawableScreen(getApplicationContext());
+            blackPaint = new Paint();
+            blackPaint.setColor(Color.BLACK);
         }
 
         @Override
@@ -163,7 +175,14 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+            Rect previewCard = getPeekCardPosition();
+
+            if (!previewCard.isEmpty() && peekCardMode.equals("Resize screen")) {
+                bounds = new Rect(bounds.left, bounds.top, bounds.right, previewCard.top);
+            }
             drawableScreen.Draw(canvas, bounds, mIsRound, mIsAmbient, mLowBitAmbient);
+            if (!previewCard.isEmpty() && peekCardMode.equals("Black"))
+                canvas.drawRect(previewCard, blackPaint);
         }
 
         private void updateTimer() {
@@ -183,7 +202,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "WatchFaceWakelockTag");
 
-
             mWakeLock.acquire();
             Handler mWakeLockHandler = new Handler();
             mWakeLockHandler.postDelayed(new Runnable() {
@@ -192,6 +210,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     mWakeLock.release();
                 }
             }, 5000);
+
+            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
+            setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
+                    .setAcceptsTapEvents(false)
+                    .setCardPeekMode(peekCardMode.equals("Hidden") ? WatchFaceStyle.PEEK_MODE_NONE : WatchFaceStyle.PEEK_MODE_VARIABLE)
+                    .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_OPAQUE)
+                    .setShowSystemUiTime(false)
+                    .build());
 
             invalidate();
         }

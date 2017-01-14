@@ -11,6 +11,5 @@
         android:text=""
         android:ems="10"
         android:id="@+id/watch_name_text"
-        android:maxLines="1"
-        android:selectAllOnFocus="true" />
+        android:maxLines="1" />
 </FrameLayout>

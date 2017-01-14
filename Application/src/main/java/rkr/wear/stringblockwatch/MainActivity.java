@@ -49,7 +49,7 @@ public class MainActivity extends SettingsCommon {
         }
     }
 
-    public static class PreferencesFragment extends PreferenceFragment {
+    public static class PreferencesFragment extends SettingsSharedFragment {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -90,8 +90,7 @@ public class MainActivity extends SettingsCommon {
 
             for (final Integer row : rows)
             {
-                Preference pref = new Preference(screen.getContext());
-                pref.setTitle(String.format("Row %d", rows.indexOf(row) + 1));
+                Preference pref = AddPreference(category, String.format("Row %d", rows.indexOf(row) + 1));
                 String rowValue = "";
                 for (Integer rowItem : Util.GetRowItems(screen.getContext(), row)) {
                     String itemValue = Util.GetRowItemValue(screen.getContext(), row, rowItem);
@@ -110,7 +109,6 @@ public class MainActivity extends SettingsCommon {
                         return true;
                     }
                 });
-                category.addPreference(pref);
             }
         }
     }

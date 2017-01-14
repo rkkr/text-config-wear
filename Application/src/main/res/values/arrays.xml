@@ -10,6 +10,12 @@
         <item>Gray Scale</item>
         <item>Color</item>
     </string-array>
+    <string-array name="peek_modes">
+        <item>Black</item>
+        <item>Transparent</item>
+        <item>Hidden</item>
+        <item>Resize screen</item>
+    </string-array>
     <string-array name="align_modes">
         <item>Left</item>
         <item>Center</item>

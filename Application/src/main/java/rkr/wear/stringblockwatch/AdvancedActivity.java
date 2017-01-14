@@ -44,7 +44,7 @@ public class AdvancedActivity extends SettingsCommon {
         }
     };
 
-    public static class PreferencesFragment extends PreferenceFragment {
+    public static class PreferencesFragment extends SettingsSharedFragment {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {

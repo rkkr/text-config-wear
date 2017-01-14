@@ -7,8 +7,7 @@
         android:title="Wallpaper Color"
         android:entries="@array/font_color"
         android:entryValues="@array/font_color"
-        android:key="wallpaper_color"
-        android:summary="Select wallpaper" />
+        android:key="wallpaper_color" />
 
         <Preference
             android:title="Sample watches"

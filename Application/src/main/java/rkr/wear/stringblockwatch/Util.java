@@ -2,7 +2,10 @@ package rkr.wear.stringblockwatch;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -137,5 +140,4 @@ class Util {
                 return Object.class;
         }
     }
-
 }

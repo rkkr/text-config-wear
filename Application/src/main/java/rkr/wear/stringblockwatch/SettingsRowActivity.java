@@ -185,7 +185,7 @@ public class SettingsRowActivity extends SettingsCommon {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class PreferencesFragment extends PreferenceFragment {
+    public static class PreferencesFragment extends SettingsSharedFragment {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -193,18 +193,10 @@ public class SettingsRowActivity extends SettingsCommon {
 
             addPreferencesFromResource(R.xml.pref_row_content);
 
-            PreferenceScreen screen = this.getPreferenceScreen();
             PreferenceCategory category = (PreferenceCategory)findPreference("row_general");
 
-            ListPreference alignmentPref = new ListPreference(screen.getContext());
-            alignmentPref.setKey("row_" + rowNum + "_align");
-            alignmentPref.setEntryValues(R.array.align_modes);
-            alignmentPref.setEntries(R.array.align_modes);
-            alignmentPref.setTitle("Alignment");
-            category.addPreference(alignmentPref);
-
-            Preference paddingPref = new Preference(screen.getContext());
-            paddingPref.setTitle("Padding");
+            AddListPreference(category, "Alignment", "row_" + rowNum + "_align", R.array.align_modes);
+            Preference paddingPref = AddPreference(category, "Padding");
             paddingPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -215,10 +207,8 @@ public class SettingsRowActivity extends SettingsCommon {
                     return true;
                 }
             });
-            category.addPreference(paddingPref);
 
-            Preference orderPref = new Preference(screen.getContext());
-            orderPref.setTitle("Reorder");
+            Preference orderPref = AddPreference(category, "Reorder");
             orderPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -229,7 +219,6 @@ public class SettingsRowActivity extends SettingsCommon {
                     return true;
                 }
             });
-            category.addPreference(orderPref);
         }
 
         @Override

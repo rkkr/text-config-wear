@@ -25,6 +25,9 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class DigitalWatchFaceConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
     public static final String PATH_WITH_FEATURE = "/watch_face_config";
@@ -61,6 +64,13 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
                 prefs.putInt(key, (Integer) value);
             else if (value instanceof Boolean)
                 prefs.putBoolean(key, (Boolean) value);
+            else if (value instanceof String[]) {
+
+                Set<String> temp = new HashSet<String>();
+                for (String item : (String[]) value)
+                    temp.add(item);
+                prefs.putStringSet(key, temp);
+            }
             else
                 Log.e(TAG, "Unsupported setting type");
         }

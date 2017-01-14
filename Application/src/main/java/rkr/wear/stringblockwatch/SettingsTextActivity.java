@@ -21,8 +21,7 @@ public class SettingsTextActivity extends SettingsItemCommon {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState, rowNum, itemNum);
 
-            AddEditTextPreference("Text", "value");
-
+            AddEditTextPreference(defaultCategory, "Text", "value");
         }
 
         public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)

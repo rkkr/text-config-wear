@@ -47,7 +47,7 @@ import java.util.Set;
 public class SettingsCommon extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final String TAG = "DigitalWatchFaceConfig";
+    private static final String TAG = "SettingsCommon";
     private static final String PATH_WITH_FEATURE = "/watch_face_config";
 
     private GoogleApiClient mGoogleApiClient;
@@ -177,8 +177,12 @@ public class SettingsCommon extends AppCompatActivity
                 config.putBoolean(key, sharedPreferences.getBoolean(key, false));
             else if (pref instanceof Integer)
                 config.putInt(key, sharedPreferences.getInt(key, 0));
+            else if (pref instanceof Set) {
+                Set<String> temp = sharedPreferences.getStringSet(key, new HashSet<String>());
+                config.putStringArray(key, temp.toArray(new String[temp.size()]));
+            }
             else
-                Log.e("Settings", key + " unsupported type");
+                Log.e(TAG, key + " unsupported type");
         }
 
         if (config.size() > 0)

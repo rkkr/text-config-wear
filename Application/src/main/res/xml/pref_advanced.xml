@@ -3,13 +3,19 @@
         android:title="Advanced Settings" >
 
     <ListPreference
-        android:defaultValue="1"
-        android:title="Idle mode"
+        android:defaultValue="White"
+        android:title="Idle mode text color"
         android:entries="@array/idle_modes"
         android:entryValues="@array/idle_modes"
-        android:key="idle_mode_color"
-        android:summary="Select how text is displayed when watch is in idle mode" />
+        android:key="idle_mode_color" />
     </PreferenceCategory>
+
+    <ListPreference
+        android:defaultValue="Black"
+        android:title="Peek card style"
+        android:entries="@array/peek_modes"
+        android:entryValues="@array/peek_modes"
+        android:key="peek_mode" />
 
     <Preference
         android:title="Force settings resync"

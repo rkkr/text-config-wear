@@ -4,7 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class DrawableItemCommon implements IDrawableItem {
 
@@ -14,6 +18,8 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     private boolean hideIdle;
     private int color;
     private int colorAmbient;
+    private Set<String> font;
+    private boolean forceCaps;
 
     public DrawableItemCommon(Context context, int rowIndex, int itemIndex)
     {
@@ -33,9 +39,17 @@ public abstract class DrawableItemCommon implements IDrawableItem {
         }
         hideIdle = GetRowItemBoolean(rowIndex, itemIndex, "hide_idle", false);
         height = Integer.parseInt(GetRowItemString(rowIndex, itemIndex, "text_size", "40"));
+        font = GetRowItemSet(rowIndex, itemIndex, "text_font");
 
         paint = new Paint();
         paint.setTextSize(height);
+        int textType = Typeface.NORMAL;
+        if (font.contains("Bold"))
+            textType += Typeface.BOLD;
+        if (font.contains("Italic"))
+            textType += Typeface.ITALIC;
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, textType));
+        forceCaps = font.contains("All Caps");
     }
 
     public int height()
@@ -53,9 +67,13 @@ public abstract class DrawableItemCommon implements IDrawableItem {
         if (ambient && hideIdle)
             return;
 
-        paint.setAntiAlias(lowBit && ambient);
+        //paint.setAntiAlias(lowBit && ambient);
+        paint.setAntiAlias(true);
         paint.setColor(ambient ? colorAmbient: color);
-        canvas.drawText(GetText(ambient), startX, startY, paint);
+        String text = GetText(ambient);
+        if (forceCaps)
+            text = text.toUpperCase();
+        canvas.drawText(text, startX, startY, paint);
     }
 
     public String GetRowItemString(int rowNum, int itemNum, String key, String defaultValue)
@@ -71,5 +89,10 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     public boolean GetRowItemBoolean(int rowNum, int itemNum, String key, boolean defaultValue)
     {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("row_" + rowNum + "_item_" + itemNum + "_" + key, defaultValue);
+    }
+
+    public Set<String> GetRowItemSet(int rowNum, int itemNum, String key)
+    {
+        return PreferenceManager.getDefaultSharedPreferences(context).getStringSet("row_" + rowNum + "_item_" + itemNum + "_" + key, new HashSet<String>());
     }
 }

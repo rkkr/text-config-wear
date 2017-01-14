@@ -9,14 +9,16 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceGroup;
 import android.preference.SwitchPreference;
+import android.util.Log;
 
 import java.util.HashSet;
 
 
-public class SettingsItemFragment extends PreferenceFragment {
+public class SettingsItemFragment extends SettingsSharedFragment {
 
-    private PreferenceCategory category;
+    public PreferenceCategory defaultCategory;
     private int rowNum;
     private int itemNum;
 
@@ -29,16 +31,17 @@ public class SettingsItemFragment extends PreferenceFragment {
         this.itemNum = itemNum;
         this.rowNum = rowNum;
 
-        PreferenceCategory configCategory = new PreferenceCategory(this.getPreferenceScreen().getContext());
-        configCategory.setTitle("Configuration");
-        this.getPreferenceScreen().addPreference(configCategory);
+        PreferenceCategory category = new PreferenceCategory(this.getPreferenceScreen().getContext());
+        category.setTitle("Configuration");
+        this.getPreferenceScreen().addPreference(category);
+        defaultCategory = category;
 
-        this.category = new PreferenceCategory(this.getPreferenceScreen().getContext());
-        this.category.setTitle("Display");
-        this.getPreferenceScreen().addPreference(this.category);
+        category = new PreferenceCategory(this.getPreferenceScreen().getContext());
+        category.setTitle("Display");
+        this.getPreferenceScreen().addPreference(category);
 
-        AddSwitchPreference("Hide on idle mode", "hide_idle");
-        Preference pref = AddPreference("Reorder");
+        AddSwitchPreference(category, "Hide on idle mode", "hide_idle");
+        Preference pref = AddPreference(category, "Reorder");
         pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -51,60 +54,38 @@ public class SettingsItemFragment extends PreferenceFragment {
             }
         });
 
-        this.category = new PreferenceCategory(this.getPreferenceScreen().getContext());
-        this.category.setTitle("Font");
-        this.getPreferenceScreen().addPreference(this.category);
+        category = new PreferenceCategory(this.getPreferenceScreen().getContext());
+        category.setTitle("Font");
+        this.getPreferenceScreen().addPreference(category);
 
-        AddListPreference("Font Size", "text_size", R.array.font_size);
-        AddMultiSelectListPreference("Font Type", "text_font", R.array.font_type);
-        AddListPreference("Font Color", "text_color", R.array.font_color);
-
-        this.category = configCategory;
+        AddListPreference(category, "Font Size", "text_size", R.array.font_size);
+        AddMultiSelectListPreference(category, "Font Type", "text_font", R.array.font_type);
+        AddListPreference(category, "Font Color", "text_color", R.array.font_color);
     }
 
-    public Preference AddPreference(String title)
+    public Preference AddPreference(PreferenceCategory category, String title)
     {
-        Preference pref = new Preference(category.getContext());
-        pref.setTitle(title);
-        category.addPreference(pref);
-        return  pref;
+        return super.AddPreference(category, title);
     }
 
-    public void AddSwitchPreference(String title, String key)
+    public SwitchPreference AddSwitchPreference(PreferenceCategory category, String title, String key)
     {
-        SwitchPreference pref = new SwitchPreference(category.getContext());
-        pref.setTitle(title);
-        pref.setKey("row_" + rowNum + "_item_" + itemNum + "_" + key);
-        category.addPreference(pref);
+        return super.AddSwitchPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key);
     }
 
-    public void AddEditTextPreference(String title, String key)
+    public EditTextPreference AddEditTextPreference(PreferenceCategory category, String title, String key)
     {
-        EditTextPreference pref = new EditTextPreference(category.getContext());
-        pref.setTitle(title);
-        pref.setKey("row_" + rowNum + "_item_" + itemNum + "_" + key);
-        category.addPreference(pref);
+        return super.AddEditTextPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key);
     }
 
-    public ListPreference AddListPreference(String title, String key, int resource)
+    public ListPreference AddListPreference(PreferenceCategory category, String title, String key, int resource)
     {
-        ListPreference pref = new ListPreference(category.getContext());
-        pref.setTitle(title);
-        pref.setKey("row_" + rowNum + "_item_" + itemNum + "_" + key);
-        pref.setEntries(resource);
-        pref.setEntryValues(resource);
-        category.addPreference(pref);
-        return pref;
+        return super.AddListPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key, resource);
     }
 
-    public void AddMultiSelectListPreference(String title, String key, int resource)
+    public MultiSelectListPreference AddMultiSelectListPreference(PreferenceCategory category, String title, String key, int resource)
     {
-        MultiSelectListPreference pref = new MultiSelectListPreference(category.getContext());
-        pref.setTitle(title);
-        pref.setKey("row_" + rowNum + "_item_" + itemNum + "_" + key);
-        pref.setEntries(resource);
-        pref.setEntryValues(resource);
-        category.addPreference(pref);
+        return super.AddMultiSelectListPreference(category, title, "row_" + rowNum + "_item_" + itemNum + "_" + key, resource);
     }
 
     public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)
