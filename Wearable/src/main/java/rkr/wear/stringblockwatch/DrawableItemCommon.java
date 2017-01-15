@@ -68,8 +68,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
         if (ambient && hideIdle)
             return;
 
-        //paint.setAntiAlias(lowBit && ambient);
-        paint.setAntiAlias(true);
+        paint.setAntiAlias(!lowBit || !ambient);
         paint.setColor(ambient ? colorAmbient: color);
         String text = GetText(ambient);
         if (forceCaps)

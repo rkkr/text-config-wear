@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.preference.PreferenceManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 public class DrawableScreen {
@@ -123,7 +125,15 @@ public class DrawableScreen {
                 String _key = key.next();
                 Object value = jObject.get(_key);
 
-                editor.putString(_key, (String)value);
+                if (value instanceof JSONArray) {
+                    JSONArray array = (JSONArray)value;
+                    HashSet<String> _value = new HashSet<String>();
+                    for (int i=0; i<array.length(); i++)
+                        _value.add(array.getString(i));
+                    editor.putStringSet(_key, _value);
+                } else {
+                    editor.putString(_key, (String) value);
+                }
             }
 
             editor.commit();
