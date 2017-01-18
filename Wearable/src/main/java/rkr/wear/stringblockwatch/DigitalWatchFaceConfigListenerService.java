@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import java.util.HashSet;
@@ -30,28 +31,51 @@ import java.util.Set;
 
 public class DigitalWatchFaceConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
-    public static final String PATH_WITH_FEATURE = "/watch_face_config";
+    public static final String SETTINGS_PATH = "/watch_face_config";
+    //private static final String WEATHER_PATH = "/watch_face_weather";
+    public static final String HTTP_PROXY_PATH = "/watch_face_proxy";
+
+    //private static String phoneNoneId;
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
 
         Log.d(TAG, "onMessageReceived: " + messageEvent);
 
-        if (!messageEvent.getPath().equals(PATH_WITH_FEATURE)) {
-            return;
+        switch (messageEvent.getPath()) {
+            case SETTINGS_PATH:
+                DataMap settingsConfig = DataMap.fromByteArray(messageEvent.getData());
+                SaveDataMap(settingsConfig);
+                Intent intent = new Intent("text.config.wear.SETTING_CHANGED");
+                sendBroadcast(intent);
+                return;
+            case HTTP_PROXY_PATH:
+                String response = new String(messageEvent.getData());
+                WeatherService.getHttpRequestCallback(this.getApplicationContext(), response);
+                //DataMap weatherConfig = DataMap.fromByteArray(messageEvent.getData());
+                //SaveDataMap(weatherConfig);
+                return;
         }
-        byte[] rawData = messageEvent.getData();
-
-        DataMap configKeysToOverwrite = DataMap.fromByteArray(rawData);
-        Log.d(TAG, "Received watch face config message: " + configKeysToOverwrite);
-
-        SaveDataMap(configKeysToOverwrite);
-        Intent intent = new Intent("text.config.wear.SETTING_CHANGED");
-        sendBroadcast(intent);
     }
+
+    @Override
+    public void onPeerConnected(Node peer) {
+        DigitalWatchFaceService.setPhoneNode(peer);
+    }
+
+    /*@Override
+    public void onPeerDisconnected(Node peer) {
+        phoneNoneId = null;
+    }
+
+    public static String getPhoneNodeId() {
+        return phoneNoneId;
+    };*/
 
     private void SaveDataMap(DataMap dataMap)
     {
+        Log.d(TAG, "Received watch face config message: " + dataMap);
+
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext()).edit();
         for (String key : dataMap.keySet())
         {
@@ -60,6 +84,8 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
                 prefs.remove(key);
             else if (value instanceof String)
                 prefs.putString(key, (String)value);
+            else if (value instanceof Long)
+                prefs.putLong(key, (Long) value);
             else if (value instanceof Integer)
                 prefs.putInt(key, (Integer) value);
             else if (value instanceof Boolean)

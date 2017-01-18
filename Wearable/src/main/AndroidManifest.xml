@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +14,26 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="rkr.wear.stringblockwatch" >
+    package="rkr.wear.stringblockwatch">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
-
-        <uses-library android:name="com.google.android.wearable" android:required="false" />
+        android:label="@string/app_name">
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="false" />
 
         <service
             android:name=".DigitalWatchFaceService"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_WALLPAPER" >
+            android:permission="android.permission.BIND_WALLPAPER">
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
@@ -45,8 +46,10 @@
             <meta-data
                 android:name="com.google.android.wearable.watchface.companionConfigurationAction"
                 android:value="rkr.wear.stringblockwatch.CONFIG_DIGITAL" />
+
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
+
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
         </service>
@@ -57,13 +60,29 @@
             and android.intent.category.DEFAULT.
         -->
 
-        <service android:name=".DigitalWatchFaceConfigListenerService" >
+        <service
+            android:name=".DigitalWatchFaceConfigListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/"/>
+
+                <data
+                    android:host="*"
+                    android:pathPrefix="/"
+                    android:scheme="wear" />
             </intent-filter>
         </service>
 
+        <receiver
+            android:name=".WeatherService"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="rkr.wear.stringblockwatch.WEATHER_UPDATE" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".PermissionActivity"
+            android:label="@string/title_activity_permission"></activity>
     </application>
 
 </manifest>

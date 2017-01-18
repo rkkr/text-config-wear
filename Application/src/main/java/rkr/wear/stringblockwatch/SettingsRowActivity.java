@@ -48,6 +48,7 @@ public class SettingsRowActivity extends SettingsCommon {
         final TextView timeButton = (TextView) findViewById(R.id.settings_fab_time);
         final TextView dateButton = (TextView) findViewById(R.id.settings_fab_date);
         final TextView textButton = (TextView) findViewById(R.id.settings_fab_text);
+        final TextView weatherButton = (TextView) findViewById(R.id.settings_fab_weather);
         final float scale = getResources().getDisplayMetrics().density;
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +57,7 @@ public class SettingsRowActivity extends SettingsCommon {
                 if (!fabExpanded){
                     fabExpanded = true;
                     ViewCompat.animate(fab).rotation(45.0F).setDuration(300).start();
+                    ViewCompat.animate(weatherButton).alpha(1).yBy(-225 * scale).setDuration(300);
                     ViewCompat.animate(timeButton).alpha(1).yBy(-175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(1).yBy(-125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(1).yBy(-75 * scale).setDuration(300);
@@ -65,6 +67,7 @@ public class SettingsRowActivity extends SettingsCommon {
                 } else {
                     fabExpanded = false;
                     ViewCompat.animate(fab).rotation(0.0F).setDuration(300).start();
+                    ViewCompat.animate(weatherButton).alpha(0).yBy(225 * scale).setDuration(300);
                     ViewCompat.animate(timeButton).alpha(0).yBy(175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(0).yBy(125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(0).yBy(75 * scale).setDuration(300);
@@ -128,6 +131,24 @@ public class SettingsRowActivity extends SettingsCommon {
                 onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(v.getContext()), keys);
             }
         });
+
+        weatherButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
+
+                int itemNum = Util.AddRowItem(v.getContext(), rowNum, "Weather");
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
+                HashSet<String> keys = SettingsWeatherActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, itemNum);
+                editor.commit();
+
+                Intent intent = new Intent(v.getContext(), SettingsWeatherActivity.class);
+                intent.putExtra("ROW_ID", rowNum);
+                intent.putExtra("ITEM_ID", itemNum);
+                v.getContext().startActivity(intent);
+                onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(v.getContext()), keys);
+            }
+        });
     }
 
     @Override
@@ -140,9 +161,12 @@ public class SettingsRowActivity extends SettingsCommon {
             TextView timeButton = (TextView) findViewById(R.id.settings_fab_time);
             TextView dateButton = (TextView) findViewById(R.id.settings_fab_date);
             TextView textButton = (TextView) findViewById(R.id.settings_fab_text);
+            TextView weatherButton = (TextView) findViewById(R.id.settings_fab_weather);
             float scale = getResources().getDisplayMetrics().density;
 
             fab.setRotation(0.0F);
+            weatherButton.setAlpha(0);
+            weatherButton.setY(225 * scale + timeButton.getY());
             timeButton.setAlpha(0);
             timeButton.setY(175 * scale + timeButton.getY());
             dateButton.setAlpha(0);

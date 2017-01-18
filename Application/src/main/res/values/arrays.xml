@@ -105,4 +105,9 @@
         <item>Rename</item>
         <item>Delete</item>
     </string-array>
+    <string-array name="weather_item" >
+        <item>Temperature</item>
+        <item>Weather description</item>
+        <item>Location</item>
+    </string-array>
 </resources>

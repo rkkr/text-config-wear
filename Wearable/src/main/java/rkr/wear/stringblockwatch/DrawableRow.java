@@ -15,7 +15,7 @@ public class DrawableRow {
     private int paddingLeft;
     private int paddingRight;
     private int paddingBottom;
-    private ArrayList<IDrawableItem> drawableItems;
+    public ArrayList<IDrawableItem> drawableItems;
     private Context context;
     public String alignment;
 
@@ -37,6 +37,9 @@ public class DrawableRow {
                     break;
                 case "Date":
                     drawableItems.add(new DrawableDate(context, rowIndex, itemNum));
+                    break;
+                case "Weather":
+                    drawableItems.add(new DrawableWeather(context, rowIndex, itemNum));
                     break;
                 default:
                     Log.e("StringWatch", "Unknown item type: " + itemType);

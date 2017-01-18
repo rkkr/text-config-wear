@@ -43,6 +43,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import rkr.wear.stringblockwatch.weather.BootService;
+
 
 public class SettingsCommon extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -185,8 +187,13 @@ public class SettingsCommon extends AppCompatActivity
                 Log.e(TAG, key + " unsupported type");
         }
 
-        if (config.size() > 0)
+        if (config.size() > 0) {
             sendConfigUpdateMessage(config);
+
+            //Something changed in the settings. Ping boot service to check for Weather blocks.
+            Intent intent = new Intent("string.block.watch.SETTINGS_CHANGE");
+            sendBroadcast(intent);
+        }
     }
 
     private void sendConfigUpdateMessage(DataMap config) {

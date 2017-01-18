@@ -65,6 +65,23 @@
         android:textColor="@color/black"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+    <TextView
+        android:id="@+id/settings_fab_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:layout_gravity="bottom|end"
+        android:background="@drawable/fab_round_button"
+        android:clickable="false"
+        android:alpha="0"
+        android:paddingTop="3dip"
+        android:paddingBottom="2dip"
+        android:paddingLeft="15dip"
+        android:paddingRight="15dip"
+        android:text="Weather"
+        android:textColor="@color/black"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/settings_fab"
         android:layout_width="wrap_content"

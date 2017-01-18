@@ -101,6 +101,14 @@ public class DrawableScreen {
         }
     }
 
+    public boolean NeedsLocationAccess() {
+        for (DrawableRow row : drawableRows)
+            for (IDrawableItem item : row.drawableItems)
+                if (item instanceof DrawableWeather)
+                    return true;
+        return false;
+    }
+
     private void ImportWatch(InputStream inputStream, Context context)
     {
         final int bufferSize = 1024;

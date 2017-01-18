@@ -16,8 +16,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="rkr.wear.stringblockwatch">
 
-    <!-- Permissions required by the wearable app -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Location permission used by FitDistanceWatchFaceService -->
     <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
@@ -82,8 +84,27 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SettingsWeatherActivity"
+            android:label="Weather Settings">
+            <intent-filter>
+                <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ImportActivity"
-            android:label="Import and Export"/>
+            android:label="Import and Export" />
+        <service
+            android:name=".HttpProxy">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+
+                <data
+                    android:host="*"
+                    android:pathPrefix="/"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

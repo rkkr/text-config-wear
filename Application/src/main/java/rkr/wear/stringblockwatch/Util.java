@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-class Util {
+public class Util {
 
     public static ArrayList<Integer> GetRows(Context context)
     {
@@ -136,6 +136,8 @@ class Util {
                 return SettingsTimeActivity.class;
             case "Date":
                 return SettingsDateActivity.class;
+            case "Weather":
+                return SettingsWeatherActivity.class;
             default:
                 return Object.class;
         }

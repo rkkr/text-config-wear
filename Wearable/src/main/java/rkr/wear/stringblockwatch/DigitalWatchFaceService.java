@@ -16,38 +16,74 @@
 
 package rkr.wear.stringblockwatch;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import java.util.HashSet;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
+
+import java.util.Calendar;
+import java.util.List;
 
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
 
     private static final long NORMAL_UPDATE_RATE_MS = 1000;
+    private static GoogleApiClient mGoogleApiClient;
+    private static Node phoneNode;
 
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    public static GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
+    }
+
+    public static Node getPhoneNode() {
+        return phoneNode;
+    }
+
+    public static void setPhoneNode(Node node) {
+        phoneNode = node;
+    }
+
+    private class Engine extends CanvasWatchFaceService.Engine implements
+            GoogleApiClient.ConnectionCallbacks,
+            LocationListener {
 
         static final int MSG_UPDATE_TIME = 0;
         final Handler mUpdateTimeHandler = new Handler() {
@@ -74,7 +110,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals("text.config.wear.SETTING_CHANGED"))
-                    updateUiForConfig();
+                    updateUiForConfig(true);
                 else {
                     invalidate();
                 }
@@ -85,6 +121,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         boolean mLowBitAmbient;
         boolean mIsRound;
         boolean mIsAmbient;
+        boolean needWeather;
         String peekCardMode;
         Paint blackPaint;
         DrawableScreen drawableScreen;
@@ -92,19 +129,16 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
-                    .setAcceptsTapEvents(false)
-                    .setCardPeekMode(peekCardMode.equals("Hidden") ? WatchFaceStyle.PEEK_MODE_NONE : WatchFaceStyle.PEEK_MODE_VARIABLE)
-                    .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
-                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_OPAQUE)
-                    .setShowSystemUiTime(false)
-                    .build());
-
-            drawableScreen = new DrawableScreen(getApplicationContext());
+            updateUiForConfig(false);
             blackPaint = new Paint();
             blackPaint.setColor(Color.BLACK);
+
+            mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                    .addApi(LocationServices.API)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .build();
         }
 
         @Override
@@ -136,6 +170,25 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
             filter.addAction("text.config.wear.SETTING_CHANGED");
             DigitalWatchFaceService.this.registerReceiver(mReceiver, filter);
+
+            mGoogleApiClient.connect();
+
+            registerWeatherReceiver();
+            registerLocationReceiver();
+        }
+
+        private void registerWeatherReceiver() {
+            if (!needWeather)
+                return;
+
+            int REPEAT_TIME = 1000 * 60 * 1;
+
+            AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
+            Intent serviceIntent = new Intent(getApplicationContext(), WeatherService.class);
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar cal = Calendar.getInstance();
+            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), REPEAT_TIME, pending);
         }
 
         private void unregisterReceiver() {
@@ -144,6 +197,19 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             }
             mRegisteredReceiver = false;
             DigitalWatchFaceService.this.unregisterReceiver(mReceiver);
+
+            mGoogleApiClient.disconnect();
+
+            unregisterWeatherReceiver();
+            unregisterLocationReceiver();
+        }
+
+        private void unregisterWeatherReceiver() {
+            AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
+            Intent serviceIntent = new Intent(getApplicationContext(), WeatherService.class);
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            service.cancel(pending);
         }
 
         @Override
@@ -202,21 +268,23 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             return isVisible() && !isInAmbientMode();
         }
 
-        private void updateUiForConfig() {
+        private void updateUiForConfig(boolean wake) {
+            if (wake) {
+                String lockTag = "WatchFaceWakelockTag_" + System.currentTimeMillis();
+                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), lockTag);
+
+                mWakeLock.acquire();
+                Handler mWakeLockHandler = new Handler();
+                mWakeLockHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mWakeLock.release();
+                    }
+                }, 5000);
+            }
+
             drawableScreen = new DrawableScreen(getApplicationContext());
-
-            String lockTag = "WatchFaceWakelockTag_" + System.currentTimeMillis();
-            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            final PowerManager.WakeLock mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), lockTag);
-
-            mWakeLock.acquire();
-            Handler mWakeLockHandler = new Handler();
-            mWakeLockHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mWakeLock.release();
-                }
-            }, 5000);
 
             peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
@@ -227,7 +295,85 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     .setShowSystemUiTime(false)
                     .build());
 
+            needWeather = drawableScreen.NeedsLocationAccess();
+            //check if weather block is added and request location access
+            if (needWeather && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(getApplicationContext(), PermissionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+            }
+
             invalidate();
+            registerLocationReceiver();
+        }
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            registerLocationReceiver();
+
+            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                @Override
+                public void onResult(@NonNull NodeApi.GetConnectedNodesResult getConnectedNodesResult) {
+                    if (!getConnectedNodesResult.getStatus().isSuccess() || getConnectedNodesResult.getNodes().size() == 0) {
+                        Log.e(TAG, "Phone is not connected");
+                        return;
+                    }
+                    phoneNode = getConnectedNodesResult.getNodes().get(0);
+                }
+            });
+        }
+
+        private void registerLocationReceiver() {
+            if (!needWeather)
+                return;
+
+            Log.d(TAG, "Registering for location");
+            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+                return;
+
+            LocationRequest locationRequest = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_LOW_POWER)
+                    .setInterval(1000 * 60 * 5)
+                    .setFastestInterval(1000 * 60 * 2);
+
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "Location permission unavailable");
+                return;
+            }
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    if (!status.getStatus().isSuccess()) {
+                        Log.e(TAG, "Location request failed: " + status.getStatusMessage());
+                    }
+                }
+            });
+        }
+
+        private void unregisterLocationReceiver() {
+            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+                return;
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(TAG, "Location update");
+
+            SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+            prefs.putFloat("weather_lat", (float) location.getLatitude());
+            prefs.putFloat("weather_lon", (float) location.getLongitude());
+            prefs.commit();
+
+            Intent intent = new Intent();
+            intent.setAction("rkr.wear.stringblockwatch.WEATHER_UPDATE");
+            sendBroadcast(intent);
         }
     }
 }
