@@ -61,6 +61,7 @@ public class SettingsRowActivity extends SettingsCommon {
                     ViewCompat.animate(timeButton).alpha(1).yBy(-175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(1).yBy(-125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(1).yBy(-75 * scale).setDuration(300);
+                    weatherButton.setClickable(true);
                     timeButton.setClickable(true);
                     dateButton.setClickable(true);
                     textButton.setClickable(true);
@@ -71,6 +72,7 @@ public class SettingsRowActivity extends SettingsCommon {
                     ViewCompat.animate(timeButton).alpha(0).yBy(175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(0).yBy(125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(0).yBy(75 * scale).setDuration(300);
+                    weatherButton.setClickable(false);
                     timeButton.setClickable(false);
                     dateButton.setClickable(false);
                     textButton.setClickable(false);
@@ -166,7 +168,7 @@ public class SettingsRowActivity extends SettingsCommon {
 
             fab.setRotation(0.0F);
             weatherButton.setAlpha(0);
-            weatherButton.setY(225 * scale + timeButton.getY());
+            weatherButton.setY(225 * scale + weatherButton.getY());
             timeButton.setAlpha(0);
             timeButton.setY(175 * scale + timeButton.getY());
             dateButton.setAlpha(0);
@@ -176,6 +178,7 @@ public class SettingsRowActivity extends SettingsCommon {
             timeButton.setClickable(false);
             dateButton.setClickable(false);
             textButton.setClickable(false);
+            weatherButton.setClickable(false);
         }
     }
 

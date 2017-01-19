@@ -32,10 +32,7 @@ import java.util.Set;
 public class DigitalWatchFaceConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
     public static final String SETTINGS_PATH = "/watch_face_config";
-    //private static final String WEATHER_PATH = "/watch_face_weather";
     public static final String HTTP_PROXY_PATH = "/watch_face_proxy";
-
-    //private static String phoneNoneId;
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
@@ -50,10 +47,8 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
                 sendBroadcast(intent);
                 return;
             case HTTP_PROXY_PATH:
-                String response = new String(messageEvent.getData());
+                String response = DataMap.fromByteArray(messageEvent.getData()).getString("body");
                 WeatherService.getHttpRequestCallback(this.getApplicationContext(), response);
-                //DataMap weatherConfig = DataMap.fromByteArray(messageEvent.getData());
-                //SaveDataMap(weatherConfig);
                 return;
         }
     }
@@ -62,15 +57,6 @@ public class DigitalWatchFaceConfigListenerService extends WearableListenerServi
     public void onPeerConnected(Node peer) {
         DigitalWatchFaceService.setPhoneNode(peer);
     }
-
-    /*@Override
-    public void onPeerDisconnected(Node peer) {
-        phoneNoneId = null;
-    }
-
-    public static String getPhoneNodeId() {
-        return phoneNoneId;
-    };*/
 
     private void SaveDataMap(DataMap dataMap)
     {

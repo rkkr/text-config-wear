@@ -107,7 +107,18 @@
     </string-array>
     <string-array name="weather_item" >
         <item>Temperature</item>
-        <item>Weather description</item>
+        <item>Weather Description</item>
+        <item>Weather Icon</item>
         <item>Location</item>
+        <item>Pressure</item>
+        <item>Humidity</item>
+        <item>Wind Speed</item>
+        <item>Sunrise</item>
+        <item>Sunset</item>
+        <item>Update Time</item>
+    </string-array>
+    <string-array name="weather_temp_units" >
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
     </string-array>
 </resources>

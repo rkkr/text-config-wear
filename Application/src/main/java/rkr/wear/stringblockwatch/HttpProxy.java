@@ -1,9 +1,6 @@
 package rkr.wear.stringblockwatch;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,7 +37,7 @@ public class HttpProxy extends WearableListenerService {
             case HTTP_PROXY_PATH:
                 String url = DataMap.fromByteArray(messageEvent.getData()).getString("url");
                 try {
-                    byte[] response = getHttp(new URL(url));
+                    DataMap response = getHttp(new URL(url));
                     if (response != null)
                         httpCallback(response);
 
@@ -52,7 +49,8 @@ public class HttpProxy extends WearableListenerService {
         }
     }
 
-    private void httpCallback(byte[] response) {
+    private void httpCallback(DataMap response) {
+        byte[] data = response.toByteArray();
         GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .build();
@@ -70,7 +68,7 @@ public class HttpProxy extends WearableListenerService {
             return;
         }
 
-        Wearable.MessageApi.sendMessage(googleApiClient, nodes.get(0).getId(), HTTP_PROXY_PATH, response).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+        Wearable.MessageApi.sendMessage(googleApiClient, nodes.get(0).getId(), HTTP_PROXY_PATH, data).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
             @Override
             public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
                 Log.d("Settings", "Send message: " + sendMessageResult.getStatus().getStatusMessage());
@@ -85,8 +83,9 @@ public class HttpProxy extends WearableListenerService {
         });
     }
 
-    private byte[] getHttp(URL url){
+    private DataMap getHttp(URL url){
         try {
+            DataMap data = new DataMap();
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -97,7 +96,11 @@ public class HttpProxy extends WearableListenerService {
                 json.append(tmp).append("\n");
             reader.close();
 
-            return json.toString().getBytes();
+            data.putString("body", json.toString());
+            data.putInt("status", connection.getResponseCode());
+            data.putString("url", url.toString());
+
+            return data;
         } catch (IOException e) {
             Log.d("Weather", e.toString());
             e.printStackTrace();

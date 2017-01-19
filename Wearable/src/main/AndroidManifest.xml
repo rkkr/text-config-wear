@@ -72,14 +72,6 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name=".WeatherService"
-            android:enabled="true" >
-            <intent-filter>
-                <action android:name="rkr.wear.stringblockwatch.WEATHER_UPDATE" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".PermissionActivity"
             android:label="@string/title_activity_permission"></activity>

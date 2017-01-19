@@ -61,7 +61,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
 
     private static final long NORMAL_UPDATE_RATE_MS = 1000;
-    private static GoogleApiClient mGoogleApiClient;
+    //private static GoogleApiClient mGoogleApiClient;
     private static Node phoneNode;
 
     @Override
@@ -69,9 +69,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    public static GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
-    }
+    //public static GoogleApiClient getGoogleApiClient() {
+    //    return mGoogleApiClient;
+    //}
 
     public static Node getPhoneNode() {
         return phoneNode;
@@ -125,6 +125,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         String peekCardMode;
         Paint blackPaint;
         DrawableScreen drawableScreen;
+        GoogleApiClient mGoogleApiClient;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -173,11 +174,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mGoogleApiClient.connect();
 
-            registerWeatherReceiver();
+            //registerWeatherReceiver();
             registerLocationReceiver();
         }
 
-        private void registerWeatherReceiver() {
+        /*private void registerWeatherReceiver() {
             if (!needWeather)
                 return;
 
@@ -189,7 +190,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             Calendar cal = Calendar.getInstance();
             service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), REPEAT_TIME, pending);
-        }
+        }*/
 
         private void unregisterReceiver() {
             if (!mRegisteredReceiver) {
@@ -200,17 +201,17 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mGoogleApiClient.disconnect();
 
-            unregisterWeatherReceiver();
+            //unregisterWeatherReceiver();
             unregisterLocationReceiver();
         }
 
-        private void unregisterWeatherReceiver() {
+        /*private void unregisterWeatherReceiver() {
             AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
             Intent serviceIntent = new Intent(getApplicationContext(), WeatherService.class);
             PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             service.cancel(pending);
-        }
+        }*/
 
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
@@ -334,8 +335,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             LocationRequest locationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_LOW_POWER)
-                    .setInterval(1000 * 60 * 5)
-                    .setFastestInterval(1000 * 60 * 2);
+                    .setInterval(1000 * 60 * 60)
+                    .setFastestInterval(1000 * 60 * 10);
 
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "Location permission unavailable");
@@ -371,9 +372,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             prefs.putFloat("weather_lon", (float) location.getLongitude());
             prefs.commit();
 
-            Intent intent = new Intent();
-            intent.setAction("rkr.wear.stringblockwatch.WEATHER_UPDATE");
-            sendBroadcast(intent);
+            WeatherService.onReceive(getApplicationContext(), mGoogleApiClient);
+            //Intent intent = new Intent();
+            //intent.setAction("rkr.wear.stringblockwatch.WEATHER_UPDATE");
+            //sendBroadcast(intent);
         }
     }
 }

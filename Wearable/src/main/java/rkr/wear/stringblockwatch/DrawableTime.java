@@ -1,7 +1,6 @@
 package rkr.wear.stringblockwatch;
 
 import android.content.Context;
-import android.graphics.Canvas;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -19,13 +18,13 @@ public class DrawableTime extends DrawableItemCommon {
         timeFormat = GetRowItemString(rowIndex, itemIndex, "format", "Number");
 
         calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getDefault());
     }
 
     public String GetText(boolean ambient)
     {
         long now = System.currentTimeMillis();
         calendar.setTimeInMillis(now);
-        calendar.setTimeZone(TimeZone.getDefault());
         if (ambient)
             calendar.set(Calendar.SECOND, 0);
 

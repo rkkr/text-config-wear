@@ -11,6 +11,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.SwitchPreference;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Locale;

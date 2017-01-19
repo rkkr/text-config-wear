@@ -43,8 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import rkr.wear.stringblockwatch.weather.BootService;
-
 
 public class SettingsCommon extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
