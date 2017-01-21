@@ -1,7 +1,6 @@
 {
   "row_3_align": "Center",
   "row_3_padding_top": "20",
-  "idle_mode_color": "White",
   "row_3_padding_left": "10",
   "row_3_item_4_text_color": "0xFFFFFFFF",
   "row_1_item_4_value": " ",
@@ -43,7 +42,6 @@
   "row_1_padding_right": "10",
   "row_2_items": "2",
   "row_3_item_4_value": " ",
-  "wallpaper_color": "0xFF000000",
   "row_1_item_3_value": "Minute",
   "row_1_items": "1,4,3",
   "row_1_item_1_format": "Word",

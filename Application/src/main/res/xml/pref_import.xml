@@ -15,6 +15,10 @@
             android:title="All words"
             android:key="watch_sample_2"
             android:summary="Date and time in words" />
+        <Preference
+            android:title="Weather details"
+            android:key="watch_sample_3"
+            android:summary="All available weather information" />
 
     </PreferenceCategory>
 

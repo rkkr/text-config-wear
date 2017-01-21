@@ -1,9 +1,11 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.settings;
 
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaScannerConnection;
+import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
@@ -11,7 +13,6 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -34,8 +35,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+
+import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.common.SettingsCommon;
 
 public class ImportActivity extends SettingsCommon {
 
@@ -68,62 +71,33 @@ public class ImportActivity extends SettingsCommon {
     }
 
     public static void RenameWatch(String oldName, String newName, Context context) {
-        try {
-            oldName = Base64.encodeToString(oldName.getBytes("UTF-8"), Base64.DEFAULT);
-            newName = Base64.encodeToString(newName.getBytes("UTF-8"), Base64.DEFAULT);
-
-            File folder = new File(context.getFilesDir(), "saved_watches");
-            if (!folder.exists()) {
-                Log.e("ImportActivity", "Application folder not found");
-                return;
-            }
-            File oldFile = new File(folder, oldName);
-            if (!oldFile.exists()) {
-                Log.e("ImportActivity", "File " + oldName + " not found");
-                return;
-            }
-            File newFile = new File(folder, newName);
-            if (newFile.exists()) {
-                Log.e("ImportActivity", "File " + newName + " already exists");
-                return;
-            }
-            oldFile.renameTo(newFile);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        File oldFile = GetWatchFile(context, oldName);
+        if (!oldFile.exists()) {
+            Log.e("ImportActivity", "File " + oldName + " not found");
+            return;
         }
+        File newFile = GetWatchFile(context, newName);
+        if (newFile.exists()) {
+            Log.e("ImportActivity", "File " + newName + " already exists");
+            return;
+        }
+        oldFile.renameTo(newFile);
+
+        MediaScannerConnection.scanFile(context, new String[] {oldFile.getAbsolutePath(), newFile.getAbsolutePath()}, null, null);
     }
 
     public static void DeleteWatch(String fileName, Context context) {
-        try {
-            fileName = Base64.encodeToString(fileName.getBytes("UTF-8"), Base64.DEFAULT);
-
-            File folder = new File(context.getFilesDir(), "saved_watches");
-            if (!folder.exists()) {
-                Log.e("ImportActivity", "Application folder not found");
-                return;
-            }
-            File file = new File(folder, fileName);
-            if (!file.exists()) {
-                Log.e("ImportActivity", "File " + fileName + " not found");
-                return;
-            }
-
-            file.delete();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        File file = GetWatchFile(context, fileName);
+        if (!file.exists()) {
+            Log.e("ImportActivity", "File " + fileName + " not found");
+            return;
         }
+        file.delete();
     }
 
     public static void ImportWatch(String fileName, Context context) {
         try {
-            fileName = Base64.encodeToString(fileName.getBytes("UTF-8"), Base64.DEFAULT);
-
-            File folder = new File(context.getFilesDir(), "saved_watches");
-            if (!folder.exists()) {
-                Log.e("ImportActivity", "Application folder not found");
-                return;
-            }
-            File file = new File(folder, fileName);
+            File file = GetWatchFile(context, fileName);
             if (!file.exists()) {
                 Log.e("ImportActivity", "File " + fileName + " not found");
                 return;
@@ -131,11 +105,22 @@ public class ImportActivity extends SettingsCommon {
 
             FileInputStream inputStream = new FileInputStream(file);
             ImportWatch(inputStream, context);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void ImportCommonSettings(Context context)
+    {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.contains("common_idle_mode_color"))
+            editor.putString("common_idle_mode_color", "Gray Scale");
+        if (!prefs.contains("common_peek_mode"))
+            editor.putString("common_peek_mode", "Black");
+        if (!prefs.contains("common_wallpaper_color"))
+            editor.putString("common_wallpaper_color", "0xFF000000");
+        editor.commit();
     }
 
     public static void ImportWatch(InputStream inputStream, Context context)
@@ -157,20 +142,23 @@ public class ImportActivity extends SettingsCommon {
             JSONObject jObject = new JSONObject(contents);
 
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-            editor.clear();
+            for (String key : PreferenceManager.getDefaultSharedPreferences(context).getAll().keySet())
+                if (key.startsWith(mPhoneId))
+                    editor.remove(key);
 
-            for (Iterator<String> key = jObject.keys(); key.hasNext(); ) {
-                String _key = key.next();
-                Object value = jObject.get(_key);
+            for (Iterator<String> keys = jObject.keys(); keys.hasNext(); ) {
+                String key = keys.next();
+                Object value = jObject.get(key);
+                key = mPhoneId + "_" + key;
 
                 if (value instanceof JSONArray) {
                     JSONArray array = (JSONArray)value;
                     HashSet<String> _value = new HashSet<String>();
                     for (int i=0; i<array.length(); i++)
                         _value.add(array.getString(i));
-                    editor.putStringSet(_key, _value);
+                    editor.putStringSet(key, _value);
                 } else {
-                    editor.putString(_key, (String) value);
+                    editor.putString(key, (String) value);
                 }
             }
 
@@ -189,13 +177,18 @@ public class ImportActivity extends SettingsCommon {
 
     public static void ExportWatch(String fileName, Context context)
     {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())) {
+            Toast.makeText(context, "External storage not available", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         JSONObject jObject = new JSONObject();
         String settingsJson;
         Map<String, ?> settings = PreferenceManager.getDefaultSharedPreferences(context).getAll();
         try {
-            fileName = Base64.encodeToString(fileName.getBytes("UTF-8"), Base64.DEFAULT);
-
             for (String key : settings.keySet()) {
+                if (key.startsWith(mPhoneId))
+                    continue;
                 Object item = settings.get(key);
                 if (item instanceof Set) {
                     JSONArray array = new JSONArray((Set<String>) item);
@@ -205,15 +198,14 @@ public class ImportActivity extends SettingsCommon {
                 }
             }
             settingsJson = jObject.toString(2);
-            Log.d("Saving watch", settingsJson);
+            //Log.d("Saving watch", settingsJson);
 
-            File folder = new File(context.getFilesDir(), "saved_watches");
-            if (!folder.exists())
-                folder.mkdirs();
-            File file = new File(folder, fileName);
+            File file = GetWatchFile(context, fileName);
             FileOutputStream outputStream = new FileOutputStream(file, false);
             outputStream.write(settingsJson.getBytes());
             outputStream.close();
+
+            MediaScannerConnection.scanFile(context, new String[] {file.getAbsolutePath()}, null, null);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -223,18 +215,21 @@ public class ImportActivity extends SettingsCommon {
         }
     }
 
-    public static ArrayList<String> ListSavedWatched(Context context)
+    public static File GetWatchFile(Context context, String fileName) {
+        File folder = new File(context.getExternalFilesDir(null), "saved_watches");
+        if (!folder.exists())
+            folder.mkdirs();
+        return new File(folder, fileName);
+    }
+
+    public static ArrayList<String> ListSavedWatches(Context context)
     {
         ArrayList<String> watches = new ArrayList<>();
 
-        File folder = new File(context.getFilesDir(), "saved_watches");
+        File folder = new File(context.getExternalFilesDir(null), "saved_watches");
         if (folder.exists())
             for (String file : folder.list())
-                try {
-                    watches.add(new String(Base64.decode(file.getBytes(), Base64.DEFAULT), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                watches.add(file);
 
         return watches;
     }
@@ -248,10 +243,12 @@ public class ImportActivity extends SettingsCommon {
                 PreferenceCategory category = (PreferenceCategory)findPreference("watches_saved");
                 category.removeAll();
 
-                List<String> watches = ListSavedWatched(mScreen.getContext());
+                List<String> watches = ListSavedWatches(mScreen.getContext());
                 for (final String watch : watches) {
+                    if (!watch.endsWith(".json"))
+                        continue;
                     Preference pref = new Preference(mScreen.getContext());
-                    pref.setTitle(watch);
+                    pref.setTitle(watch.substring(0, watch.lastIndexOf(".json")));
 
                     pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                         @Override
@@ -288,6 +285,14 @@ public class ImportActivity extends SettingsCommon {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext());
+                    return true;
+                }
+            });
+            sample = findPreference("watch_sample_3");
+            sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext());
                     return true;
                 }
             });

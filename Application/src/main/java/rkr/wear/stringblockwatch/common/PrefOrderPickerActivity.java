@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.common;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -11,10 +11,13 @@ import android.widget.NumberPicker;
 
 import java.util.ArrayList;
 
+import rkr.wear.stringblockwatch.R;
+
 public class PrefOrderPickerActivity extends DialogFragment {
 
     public int itemNum;
     public int rowNum;
+    public SettingsManager mSettings;
 
     public PrefOrderPickerActivity() {
     }
@@ -26,7 +29,7 @@ public class PrefOrderPickerActivity extends DialogFragment {
         final View view = inflater.inflate(R.layout.pref_order_picker, null);
 
         final NumberPicker list = (NumberPicker) view.findViewById(R.id.pref_order_picker);
-        final ArrayList<Integer> items = Util.GetRowItems(view.getContext(), rowNum);
+        final ArrayList<Integer> items = mSettings.GetRowItems(rowNum);
         list.setMinValue(1);
         list.setMaxValue(items.size());
         list.setValue(items.indexOf(itemNum) + 1);
@@ -40,7 +43,7 @@ public class PrefOrderPickerActivity extends DialogFragment {
                                 int newItemNum = list.getValue() - 1;
                                 items.remove(items.indexOf(itemNum));
                                 items.add(newItemNum, itemNum);
-                                Util.SaveRowItems(view.getContext(), rowNum, items);
+                                mSettings.SaveRowItems(rowNum, items);
                                 dialog.dismiss();
                             }
                         }

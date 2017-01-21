@@ -1,23 +1,16 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.settings;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.support.design.widget.FloatingActionButton;
-import android.view.View;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.common.SettingsCommon;
+import rkr.wear.stringblockwatch.common.SettingsSharedFragment;
 
 public class AdvancedActivity extends SettingsCommon {
     @Override

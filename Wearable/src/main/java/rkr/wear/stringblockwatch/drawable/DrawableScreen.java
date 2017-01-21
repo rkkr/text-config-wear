@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.drawable;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,6 +19,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import rkr.wear.stringblockwatch.R;
 
 public class DrawableScreen {
 
@@ -44,7 +46,7 @@ public class DrawableScreen {
         for (DrawableRow drawableRow : drawableRows)
             totalHeight += drawableRow.height();
 
-        color = GetScreenColor(Color.BLACK);
+        color = GetScreenColor();
     }
 
     public void Draw(Canvas canvas, Rect bounds, boolean isRound, boolean ambient, boolean lowBit)
@@ -90,14 +92,14 @@ public class DrawableScreen {
         return list;
     }
 
-    public int GetScreenColor(int defaultValue)
+    public int GetScreenColor()
     {
-        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("wallpaper_color", "");
+        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("common_wallpaper_color", "0xFF000000");
         try {
             return (int) Long.parseLong(text.replaceFirst("0x", ""), 16);
         }
         catch (NumberFormatException e) {
-            return defaultValue;
+            return Color.BLACK;
         }
     }
 

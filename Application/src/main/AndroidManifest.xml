@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Location permission used by FitDistanceWatchFaceService -->
     <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
@@ -44,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AdvancedActivity"
+            android:name=".settings.AdvancedActivity"
             android:label="Advanced Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -52,7 +53,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsRowActivity"
+            android:name=".row.SettingsRowActivity"
             android:label="Row %d Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -60,7 +61,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsTextActivity"
+            android:name=".block.SettingsTextActivity"
             android:label="Text Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -68,7 +69,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsTimeActivity"
+            android:name=".block.SettingsTimeActivity"
             android:label="Time Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -76,7 +77,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsDateActivity"
+            android:name=".block.SettingsDateActivity"
             android:label="Date Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -84,7 +85,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsWeatherActivity"
+            android:name=".block.SettingsWeatherActivity"
             android:label="Weather Settings">
             <intent-filter>
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
@@ -92,10 +93,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ImportActivity"
+            android:name=".settings.ImportActivity"
             android:label="Import and Export" />
         <service
-            android:name=".HttpProxy">
+            android:name=".service.HttpProxy">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
 

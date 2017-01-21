@@ -1,16 +1,17 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.settings;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import rkr.wear.stringblockwatch.R;
 
 public class WatchNamePickerActivity extends DialogFragment {
 
@@ -26,8 +27,8 @@ public class WatchNamePickerActivity extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.watch_name_picker, null);
         final EditText editText = (EditText) view.findViewById(R.id.watch_name_text);
-        if (fileName != null)
-            editText.setText(fileName);
+        if (fileName != null && fileName.endsWith(".json"))
+            editText.setText(fileName.substring(0, fileName.lastIndexOf(".json")));
 
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity())
                 .setTitle("Watch name")
@@ -47,10 +48,12 @@ public class WatchNamePickerActivity extends DialogFragment {
                     public void onClick(View view) {
                         String text = editText.getText().toString();
                         //If not specified
-                        if (text.equals("")) {
+                        if (text.isEmpty() || text.matches("[^ -_.A-Za-z0-9]")) {
                             Toast.makeText(view.getContext(), "Invalid file name", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        //Append file format
+                        text = text + ".json";
                         //Same name
                         if (fileName != null && text.equals(fileName)) {
                             dialog.dismiss();
@@ -58,7 +61,7 @@ public class WatchNamePickerActivity extends DialogFragment {
                         }
                         //Update name
                         if (fileName != null) {
-                            if (ImportActivity.ListSavedWatched(view.getContext()).contains(text)) {
+                            if (ImportActivity.ListSavedWatches(view.getContext()).contains(text)) {
                                 Toast.makeText(view.getContext(), "Duplicate file name", Toast.LENGTH_SHORT).show();
                                 return;
                             }
@@ -69,7 +72,7 @@ public class WatchNamePickerActivity extends DialogFragment {
                         }
                         //Save new
                         if (fileName == null) {
-                            if (ImportActivity.ListSavedWatched(view.getContext()).contains(text)) {
+                            if (ImportActivity.ListSavedWatches(view.getContext()).contains(text)) {
                                 Toast.makeText(view.getContext(), "Duplicate file name", Toast.LENGTH_SHORT).show();
                                 return;
                             }

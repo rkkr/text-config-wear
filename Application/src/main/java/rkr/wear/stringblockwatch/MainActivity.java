@@ -5,14 +5,18 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import rkr.wear.stringblockwatch.common.SettingsCommon;
+import rkr.wear.stringblockwatch.common.SettingsSharedFragment;
+import rkr.wear.stringblockwatch.row.SettingsRowActivity;
+import rkr.wear.stringblockwatch.settings.AdvancedActivity;
+import rkr.wear.stringblockwatch.settings.ImportActivity;
 
 public class MainActivity extends SettingsCommon {
     @Override
@@ -32,7 +36,7 @@ public class MainActivity extends SettingsCommon {
                 PreferenceManager.getDefaultSharedPreferences(view.getContext()).unregisterOnSharedPreferenceChangeListener(MainActivity.this);
 
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(view.getContext()).edit();
-                int rowNum = Util.AddRow(view.getContext());
+                int rowNum = mSettings.AddRow();
                 HashSet<String> keys = SettingsRowActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum);
                 editor.commit();
 
@@ -43,9 +47,10 @@ public class MainActivity extends SettingsCommon {
             }
         });
 
-        if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).contains("rows")) {
+        if (!mSettings.HasSettings()) {
             //We are started for the first time or app settings have been cleared
             ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext());
+            ImportActivity.ImportCommonSettings(getApplicationContext());
         }
     }
 
@@ -56,6 +61,8 @@ public class MainActivity extends SettingsCommon {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.pref_general);
+
+            super.Create(mPhoneId);
 
             Preference advanced = findPreference("advanced");
             advanced.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -72,8 +79,6 @@ public class MainActivity extends SettingsCommon {
         public void onResume() {
             super.onResume();
 
-            PreferenceScreen screen = this.getPreferenceScreen();
-
             Preference importSample = findPreference("import");
             importSample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -84,7 +89,7 @@ public class MainActivity extends SettingsCommon {
                 }
             });
 
-            ArrayList<Integer> rows = Util.GetRows(getView().getContext());
+            ArrayList<Integer> rows = mSettings.GetRows();
             PreferenceCategory category = (PreferenceCategory)findPreference("rows");
             category.removeAll();
 
@@ -92,8 +97,8 @@ public class MainActivity extends SettingsCommon {
             {
                 Preference pref = AddPreference(category, String.format("Row %d", rows.indexOf(row) + 1));
                 String rowValue = "";
-                for (Integer rowItem : Util.GetRowItems(screen.getContext(), row)) {
-                    String itemValue = Util.GetRowItemValue(screen.getContext(), row, rowItem);
+                for (Integer rowItem : mSettings.GetRowItems(row)) {
+                    String itemValue = mSettings.GetRowItemValue(row, rowItem);
                     if (itemValue != null)
                         rowValue += "{" + itemValue + "}";
                 }

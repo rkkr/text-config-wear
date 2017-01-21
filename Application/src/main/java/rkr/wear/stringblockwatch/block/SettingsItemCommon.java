@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.block;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +8,14 @@ import android.view.MenuItem;
 
 import java.util.HashSet;
 
+import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.common.SettingsCommon;
+
 public class SettingsItemCommon extends SettingsCommon {
 
     public static int rowNum;
     public static int itemNum;
+    public static String phoneId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +24,7 @@ public class SettingsItemCommon extends SettingsCommon {
         Intent intent = getIntent();
         rowNum = intent.getIntExtra("ROW_ID", 1);
         itemNum = intent.getIntExtra("ITEM_ID", 1);
+        phoneId = intent.getStringExtra("PHONE_ID");
     }
 
     @Override
@@ -32,7 +37,7 @@ public class SettingsItemCommon extends SettingsCommon {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_action_delete) {
             PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
-            HashSet<String> keys = Util.DeleteRowItem(getApplicationContext(), rowNum, itemNum);
+            HashSet<String> keys = mSettings.DeleteRowItem(rowNum, itemNum);
             onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(this), keys);
             finish();
             return true;

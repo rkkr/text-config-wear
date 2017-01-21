@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.drawable;
 
 
 public class NumberWordConverter {

@@ -17,8 +17,6 @@
 package rkr.wear.stringblockwatch;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,8 +52,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.Calendar;
-import java.util.List;
+import rkr.wear.stringblockwatch.drawable.DrawableScreen;
 
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
@@ -287,7 +284,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             drawableScreen = new DrawableScreen(getApplicationContext());
 
-            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
+            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("common_peek_mode", "Black");
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
                     .setAcceptsTapEvents(false)
                     .setCardPeekMode(peekCardMode.equals("Hidden") ? WatchFaceStyle.PEEK_MODE_NONE : WatchFaceStyle.PEEK_MODE_VARIABLE)
@@ -335,8 +332,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             LocationRequest locationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_LOW_POWER)
-                    .setInterval(1000 * 60 * 60)
-                    .setFastestInterval(1000 * 60 * 10);
+                    .setInterval(1000 * 60 * 30)
+                    .setFastestInterval(1000 * 60 * 5);
 
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "Location permission unavailable");
@@ -371,6 +368,20 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             prefs.putFloat("weather_lat", (float) location.getLatitude());
             prefs.putFloat("weather_lon", (float) location.getLongitude());
             prefs.commit();
+
+            if (phoneNode == null)
+                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                    @Override
+                    public void onResult(@NonNull NodeApi.GetConnectedNodesResult getConnectedNodesResult) {
+                        if (!getConnectedNodesResult.getStatus().isSuccess() || getConnectedNodesResult.getNodes().size() == 0) {
+                            Log.e(TAG, "Phone is not connected");
+                            return;
+                        }
+                        phoneNode = getConnectedNodesResult.getNodes().get(0);
+                        WeatherService.onReceive(getApplicationContext(), mGoogleApiClient);
+                    }
+                });
+
 
             WeatherService.onReceive(getApplicationContext(), mGoogleApiClient);
             //Intent intent = new Intent();

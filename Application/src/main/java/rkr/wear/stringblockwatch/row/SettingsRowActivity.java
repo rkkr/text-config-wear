@@ -1,14 +1,12 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.row;
 
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.design.widget.FloatingActionButton;
@@ -21,6 +19,15 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.common.SettingsCommon;
+import rkr.wear.stringblockwatch.block.SettingsDateActivity;
+import rkr.wear.stringblockwatch.common.SettingsSharedFragment;
+import rkr.wear.stringblockwatch.block.SettingsTextActivity;
+import rkr.wear.stringblockwatch.block.SettingsTimeActivity;
+import rkr.wear.stringblockwatch.block.SettingsWeatherActivity;
+import rkr.wear.stringblockwatch.common.SettingsManager;
 
 public class SettingsRowActivity extends SettingsCommon {
 
@@ -39,7 +46,7 @@ public class SettingsRowActivity extends SettingsCommon {
                .replace(R.id.fragment, new PreferencesFragment())
                .commit();
 
-        int rowIndex = Util.GetRows(getApplicationContext()).indexOf(rowNum) + 1;
+        int rowIndex = mSettings.GetRows().indexOf(rowNum) + 1;
         assert getSupportActionBar() != null;
         getSupportActionBar().setTitle(String.format(getSupportActionBar().getTitle().toString(), rowIndex));
 
@@ -85,9 +92,9 @@ public class SettingsRowActivity extends SettingsCommon {
             public void onClick(View v) {
                 PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
 
-                int itemNum = Util.AddRowItem(v.getContext(), rowNum, "Time");
+                int itemNum = mSettings.AddRowItem(rowNum, "Time");
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
-                HashSet<String> keys = SettingsTimeActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, itemNum);
+                HashSet<String> keys = SettingsTimeActivity.PreferencesFragment.SaveDefaultSettings(editor, mPhoneId, rowNum, itemNum);
                 editor.commit();
 
                 Intent intent = new Intent(v.getContext(), SettingsTimeActivity.class);
@@ -103,9 +110,9 @@ public class SettingsRowActivity extends SettingsCommon {
             public void onClick(View v) {
                 PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
 
-                int itemNum = Util.AddRowItem(v.getContext(), rowNum, "Date");
+                int itemNum = mSettings.AddRowItem(rowNum, "Date");
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
-                HashSet<String> keys = SettingsDateActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, itemNum);
+                HashSet<String> keys = SettingsDateActivity.PreferencesFragment.SaveDefaultSettings(editor, mPhoneId, rowNum, itemNum);
                 editor.commit();
 
                 Intent intent = new Intent(v.getContext(), SettingsDateActivity.class);
@@ -121,9 +128,9 @@ public class SettingsRowActivity extends SettingsCommon {
             public void onClick(View v) {
                 PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
 
-                int itemNum = Util.AddRowItem(v.getContext(), rowNum, "Text");
+                int itemNum = mSettings.AddRowItem(rowNum, "Text");
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
-                HashSet<String> keys = SettingsTextActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, itemNum);
+                HashSet<String> keys = SettingsTextActivity.PreferencesFragment.SaveDefaultSettings(editor, mPhoneId, rowNum, itemNum);
                 editor.commit();
 
                 Intent intent = new Intent(v.getContext(), SettingsTextActivity.class);
@@ -139,9 +146,9 @@ public class SettingsRowActivity extends SettingsCommon {
             public void onClick(View v) {
                 PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
 
-                int itemNum = Util.AddRowItem(v.getContext(), rowNum, "Weather");
+                int itemNum = mSettings.AddRowItem(rowNum, "Weather");
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
-                HashSet<String> keys = SettingsWeatherActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, itemNum);
+                HashSet<String> keys = SettingsWeatherActivity.PreferencesFragment.SaveDefaultSettings(editor, mPhoneId, rowNum, itemNum);
                 editor.commit();
 
                 Intent intent = new Intent(v.getContext(), SettingsWeatherActivity.class);
@@ -199,7 +206,7 @@ public class SettingsRowActivity extends SettingsCommon {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
-                        HashSet<String> keys = Util.DeleteRow(getApplicationContext(), rowNum);
+                        HashSet<String> keys = mSettings.DeleteRow(rowNum);
                         onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), keys);
                         finish();
                     }
@@ -242,6 +249,7 @@ public class SettingsRowActivity extends SettingsCommon {
                     FragmentManager fm = getFragmentManager();
                     RowOrderPickerActivity editOrderDialog = new RowOrderPickerActivity();
                     editOrderDialog.rowNum = rowNum;
+                    editOrderDialog.mSettings = mSettings;
                     editOrderDialog.show(fm, "row_order_picker");
                     return true;
                 }
@@ -254,20 +262,20 @@ public class SettingsRowActivity extends SettingsCommon {
 
             PreferenceScreen screen = this.getPreferenceScreen();
 
-            ArrayList<Integer> rowItems = Util.GetRowItems(screen.getContext(), rowNum);
+            ArrayList<Integer> rowItems = mSettings.GetRowItems(rowNum);
             PreferenceCategory category = (PreferenceCategory)findPreference("row_items");
             category.removeAll();
 
             for (Integer item : rowItems)
             {
                 Preference pref = new Preference(screen.getContext());
-                String itemType = Util.GetRowItemType(screen.getContext(), rowNum, item);
+                String itemType = mSettings.GetRowItemType(rowNum, item);
                 pref.setTitle(itemType);
-                String itemValue = Util.GetRowItemValue(screen.getContext(), rowNum, item);
+                String itemValue = mSettings.GetRowItemValue(rowNum, item);
                 if (itemValue != null)
                     pref.setSummary("{" + itemValue + "}");
                 final int itemNum = item;
-                final Class itemClass = Util.GetRowItemClass(itemType);
+                final Class itemClass = SettingsManager.GetRowItemClass(itemType);
 
                 pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override

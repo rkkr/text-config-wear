@@ -1,9 +1,9 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.drawable;
 
 import android.content.Context;
-import android.graphics.Canvas;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 public class DrawableDate extends DrawableItemCommon {
 
@@ -48,9 +48,9 @@ public class DrawableDate extends DrawableItemCommon {
     {
         switch (dateFormat) {
             case "Number":
-                return String.format("%d", number + 1);
+                return String.format(Locale.US, "%d", number + 1);
             case "Number with leading zeros":
-                return String.format("%02d", number + 1);
+                return String.format(Locale.US, "%02d", number + 1);
             case "Word Full":
                 return MonthToString(number);
             case "Word Short":
@@ -63,9 +63,9 @@ public class DrawableDate extends DrawableItemCommon {
     {
         switch (dateFormat) {
             case "Number":
-                return String.format("%d", number);
+                return String.format(Locale.US, "%d", number);
             case "Number with leading zeros":
-                return String.format("%0" + leadingZeros + "d", number);
+                return String.format(Locale.US, "%0" + leadingZeros + "d", number);
             case "Word":
                 return NumberWordConverter.convert(number);
         }

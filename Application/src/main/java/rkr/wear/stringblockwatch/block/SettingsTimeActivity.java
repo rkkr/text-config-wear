@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.block;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 
 import java.util.HashSet;
+
+import rkr.wear.stringblockwatch.R;
 
 public class SettingsTimeActivity extends SettingsItemCommon {
     @Override
@@ -21,7 +23,7 @@ public class SettingsTimeActivity extends SettingsItemCommon {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, rowNum, itemNum);
+            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
 
             ListPreference valuePref = AddListPreference(defaultCategory, "Time value", "value", R.array.time_value);
             final ListPreference formatPref = AddListPreference(defaultCategory, "Display format", "format", R.array.time_display);
@@ -50,13 +52,13 @@ public class SettingsTimeActivity extends SettingsItemCommon {
             });
         }
 
-        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)
+        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, String phoneId, int rowNum, int itemNum)
         {
-            HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, rowNum, itemNum);
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_value");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_value", "Hour (24H)");
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_format");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_format", "Number");
+            HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, phoneId, rowNum, itemNum);
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value");
+            preferences.putString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value", "Hour (24H)");
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_format");
+            preferences.putString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_format", "Number");
 
             return keys;
         }

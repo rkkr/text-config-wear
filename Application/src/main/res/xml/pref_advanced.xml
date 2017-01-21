@@ -7,7 +7,7 @@
         android:title="Idle mode text color"
         android:entries="@array/idle_modes"
         android:entryValues="@array/idle_modes"
-        android:key="idle_mode_color" />
+        android:key="common_idle_mode_color" />
     </PreferenceCategory>
 
     <ListPreference
@@ -15,7 +15,7 @@
         android:title="Peek card style"
         android:entries="@array/peek_modes"
         android:entryValues="@array/peek_modes"
-        android:key="peek_mode" />
+        android:key="common_peek_mode" />
 
     <Preference
         android:title="Force settings resync"

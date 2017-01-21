@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.drawable;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +25,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     {
         this.context = context;
         color = GetRowItemColor(rowIndex, itemIndex, "text_color", Color.WHITE);
-        switch (PreferenceManager.getDefaultSharedPreferences(context).getString("idle_mode_color", "White")) {
+        switch (PreferenceManager.getDefaultSharedPreferences(context).getString("common_idle_mode_color", "Gray Scale")) {
             case "White":
                 colorAmbient = Color.WHITE;
                 break;
@@ -69,7 +68,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
             return;
 
         paint.setAntiAlias(!lowBit || !ambient);
-        paint.setColor(ambient ? colorAmbient: color);
+        paint.setColor(ambient ? (lowBit ? Color.WHITE : colorAmbient): color);
         String text = GetText(ambient);
         if (forceCaps)
             text = text.toUpperCase();

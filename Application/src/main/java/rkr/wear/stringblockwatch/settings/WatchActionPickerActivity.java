@@ -1,22 +1,19 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.settings;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.NumberPicker;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import rkr.wear.stringblockwatch.R;
 
 public class WatchActionPickerActivity extends DialogFragment {
 
@@ -52,6 +49,15 @@ public class WatchActionPickerActivity extends DialogFragment {
                         editNameDialog.setOnRefreshCallback(mCallback);
                         editNameDialog.fileName = fileName;
                         editNameDialog.show(fm, "watch_name_picker");
+                        getDialog().dismiss();
+                        break;
+                    case "Send to":
+                        Uri fileUri = Uri.fromFile(ImportActivity.GetWatchFile(view.getContext(), fileName));
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        sendIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                        sendIntent.setType("application/json");
+                        startActivity(Intent.createChooser(sendIntent, "Send layout to"));
                         getDialog().dismiss();
                         break;
                     case "Delete":

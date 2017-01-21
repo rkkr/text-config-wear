@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.block;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 
 import java.util.HashSet;
+
+import rkr.wear.stringblockwatch.R;
 
 public class SettingsDateActivity extends SettingsItemCommon {
     @Override
@@ -21,7 +23,7 @@ public class SettingsDateActivity extends SettingsItemCommon {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, rowNum, itemNum);
+            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
 
             ListPreference valuePref = AddListPreference(defaultCategory, "Date value", "value", R.array.date_item);
             String dateValue = getPreferenceManager().getSharedPreferences().getString("row_" + rowNum + "_item_" + itemNum + "_value", "Year (YYYY)");
@@ -70,13 +72,13 @@ public class SettingsDateActivity extends SettingsItemCommon {
             return R.array.date_day_display;
         }
 
-        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, int itemNum)
+        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, String phoneId, int rowNum, int itemNum)
         {
-            HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, rowNum, itemNum);
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_value");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_value", "Year (YYYY)");
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_format");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_format", "Number");
+            HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, phoneId, rowNum, itemNum);
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value");
+            preferences.putString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value", "Year (YYYY)");
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_format");
+            preferences.putString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_format", "Number");
 
             return keys;
         }

@@ -1,8 +1,9 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.drawable;
 
 import android.content.Context;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class DrawableTime extends DrawableItemCommon {
@@ -48,9 +49,9 @@ public class DrawableTime extends DrawableItemCommon {
     {
         switch (timeFormat) {
             case "Number":
-                return String.format("%d", number);
+                return String.format(Locale.US, "%d", number);
             case "Number with leading zeros":
-                return String.format("%02d", number);
+                return String.format(Locale.US, "%02d", number);
             case "Word":
                 return NumberWordConverter.convert(number);
         }

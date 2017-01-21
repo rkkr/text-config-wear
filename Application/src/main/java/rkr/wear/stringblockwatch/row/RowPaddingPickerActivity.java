@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.row;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -10,6 +10,8 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.NumberPicker;
+
+import rkr.wear.stringblockwatch.R;
 
 public class RowPaddingPickerActivity extends DialogFragment {
 

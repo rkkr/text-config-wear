@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.common;
 
 import android.app.FragmentManager;
 import android.content.SharedPreferences;
@@ -19,9 +19,13 @@ import java.util.Locale;
 
 public class SettingsSharedFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public String phoneId;
+    public SettingsManager mSettings;
+
+    //@Override
+    public void Create(String phoneId) {
+        this.phoneId = phoneId;
+        this.mSettings = new SettingsManager(this.getPreferenceScreen().getContext(), phoneId);
     }
 
     public Preference AddPreference(PreferenceCategory category, String title)

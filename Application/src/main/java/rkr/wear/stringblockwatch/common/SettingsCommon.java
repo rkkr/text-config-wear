@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.common;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -43,6 +43,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import rkr.wear.stringblockwatch.R;
+
 
 public class SettingsCommon extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -51,19 +53,22 @@ public class SettingsCommon extends AppCompatActivity
     private static final String PATH_WITH_FEATURE = "/watch_face_config";
 
     private GoogleApiClient mGoogleApiClient;
-    private static String mPeerId;
+    public static String mPhoneId;
+    public SettingsManager mSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getIntent().hasExtra(WatchFaceCompanion.EXTRA_PEER_ID))
-            mPeerId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
+            mPhoneId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
+
+        mSettings = new SettingsManager(getApplicationContext(), mPhoneId);
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -121,7 +126,7 @@ public class SettingsCommon extends AppCompatActivity
             Log.d(TAG, "onConnected: " + connectionHint);
         }
 
-        if (mPeerId == null) {
+        if (mPhoneId == null) {
             displayNoConnectedDeviceDialog();
         }
     }
@@ -163,22 +168,29 @@ public class SettingsCommon extends AppCompatActivity
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, Set<String> keys) {
         DataMap config = new DataMap();
+        Map<String, ?> prefs = sharedPreferences.getAll();
 
         for (String key : keys) {
-            if (!sharedPreferences.contains(key)) {
-                config.putString(key, null);
+            if (!key.startsWith(mPhoneId + "_") && !key.startsWith("common_")) {
+                Log.e(TAG, "Setting not for phone used: " + key);
                 continue;
             }
 
-            Object pref = sharedPreferences.getAll().get(key);
+            if (!sharedPreferences.contains(key)) {
+                config.putString(key.replace(mPhoneId, ""), null);
+                continue;
+            }
+
+            Object pref = prefs.get(key);
+            key = key.replace(mPhoneId + "_", "");
             if (pref instanceof String)
-                config.putString(key, sharedPreferences.getString(key, ""));
+                config.putString(key, (String) pref);
             else if (pref instanceof Boolean)
-                config.putBoolean(key, sharedPreferences.getBoolean(key, false));
+                config.putBoolean(key, (Boolean) pref);
             else if (pref instanceof Integer)
-                config.putInt(key, sharedPreferences.getInt(key, 0));
+                config.putInt(key, (Integer) pref);
             else if (pref instanceof Set) {
-                Set<String> temp = sharedPreferences.getStringSet(key, new HashSet<String>());
+                Set<String> temp = (Set<String>) pref;
                 config.putStringArray(key, temp.toArray(new String[temp.size()]));
             }
             else
@@ -195,9 +207,9 @@ public class SettingsCommon extends AppCompatActivity
     }
 
     private void sendConfigUpdateMessage(DataMap config) {
-        if (mPeerId != null) {
+        if (mPhoneId != null) {
             byte[] rawData = config.toByteArray();
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPhoneId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                 @Override
                 public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
                     Log.d("Settings", "Send message: " + sendMessageResult.getStatus().getStatusMessage());

@@ -1,12 +1,9 @@
 package rkr.wear.stringblockwatch;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -14,7 +11,6 @@ import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
@@ -42,13 +38,18 @@ public class WeatherService{
             Log.d(TAG, "Not updating weather, timeout not passed");
             return;
         }
-        lastRequest = System.currentTimeMillis();
+
         long lastUpdate = PreferenceManager.getDefaultSharedPreferences(context).getLong("weather_update_time", 0);
         if (System.currentTimeMillis() - lastUpdate < 1000 * 60 * 30) {
             Log.d(TAG, "Not updating weather, timeout not passed");
             return;
         }
 
+        Node phoneNode = DigitalWatchFaceService.getPhoneNode();
+        if (phoneNode == null || !phoneNode.isNearby()) {
+            Log.e(TAG, "Phone is not available");
+            return;
+        }
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Location permission unavailable");
@@ -59,14 +60,17 @@ public class WeatherService{
             Log.e(TAG, "google api client connect failed");
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
-        if (location == null) {
-            Log.e(TAG, "Location is not available");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.contains("weather_lat") || !prefs.contains("weather_lon")) {
+            Log.e(TAG, "Location is unavailable");
             return;
         }
 
-        getWeather(location.getLatitude(), location.getLongitude(), googleApiClient);
+        //We have everything we need. Request will be made.
+        lastRequest = System.currentTimeMillis();
+
+        getWeather(prefs.getFloat("weather_lat", 0), prefs.getFloat("weather_lon", 0), googleApiClient);
     }
 
     private static void getWeather(double lat, double lon, GoogleApiClient googleApiClient){

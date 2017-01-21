@@ -1,4 +1,4 @@
-package rkr.wear.stringblockwatch;
+package rkr.wear.stringblockwatch.row;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -11,9 +11,13 @@ import android.widget.NumberPicker;
 
 import java.util.ArrayList;
 
+import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.common.SettingsManager;
+
 public class RowOrderPickerActivity extends DialogFragment {
 
     public int rowNum;
+    public SettingsManager mSettings;
 
     public RowOrderPickerActivity() {
     }
@@ -25,7 +29,7 @@ public class RowOrderPickerActivity extends DialogFragment {
         final View view = inflater.inflate(R.layout.pref_order_picker, null);
 
         final NumberPicker list = (NumberPicker) view.findViewById(R.id.pref_order_picker);
-        final ArrayList<Integer> items = Util.GetRows(view.getContext());
+        final ArrayList<Integer> items = mSettings.GetRows();
         list.setMinValue(1);
         list.setMaxValue(items.size());
         list.setValue(items.indexOf(rowNum) + 1);
@@ -39,7 +43,7 @@ public class RowOrderPickerActivity extends DialogFragment {
                                 int newRowNum = list.getValue() - 1;
                                 items.remove(items.indexOf(rowNum));
                                 items.add(newRowNum, rowNum);
-                                Util.SaveRows(view.getContext(), items);
+                                mSettings.SaveRows(items);
                                 dialog.dismiss();
                             }
                         }
