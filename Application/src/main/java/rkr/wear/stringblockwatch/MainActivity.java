@@ -41,7 +41,7 @@ public class MainActivity extends SettingsCommon {
 
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(view.getContext()).edit();
                 int rowNum = mSettings.AddRow();
-                HashSet<String> keys = SettingsRowActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum);
+                HashSet<String> keys = SettingsRowActivity.PreferencesFragment.SaveDefaultSettings(editor, rowNum, mWatchId);
                 editor.commit();
 
                 Intent intent = new Intent(view.getContext(), SettingsRowActivity.class);

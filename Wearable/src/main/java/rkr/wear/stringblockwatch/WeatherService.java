@@ -88,7 +88,7 @@ public class WeatherService{
             return;
         }
 
-        Wearable.MessageApi.sendMessage(googleApiClient, phoneNode.getId(), DigitalWatchFaceConfigListenerService.HTTP_PROXY_PATH, config.toByteArray()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+        Wearable.MessageApi.sendMessage(googleApiClient, phoneNode.getId(), ConfigListenerService.HTTP_PROXY_PATH, config.toByteArray()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
             @Override
             public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
                 Log.d(TAG, "Send message: " + sendMessageResult.getStatus().getStatusMessage());

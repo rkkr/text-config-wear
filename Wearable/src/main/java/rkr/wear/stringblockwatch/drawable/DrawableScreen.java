@@ -103,10 +103,18 @@ public class DrawableScreen {
         }
     }
 
-    public boolean NeedsLocationAccess() {
+    public boolean NeedsWeatherAccess() {
         for (DrawableRow row : drawableRows)
             for (IDrawableItem item : row.drawableItems)
                 if (item instanceof DrawableWeather)
+                    return true;
+        return false;
+    }
+
+    public boolean NeedsFitAccess() {
+        for (DrawableRow row : drawableRows)
+            for (IDrawableItem item : row.drawableItems)
+                if (item instanceof DrawableFit)
                     return true;
         return false;
     }

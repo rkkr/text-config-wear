@@ -14,6 +14,7 @@ import rkr.wear.stringblockwatch.block.SettingsDateActivity;
 import rkr.wear.stringblockwatch.block.SettingsTextActivity;
 import rkr.wear.stringblockwatch.block.SettingsTimeActivity;
 import rkr.wear.stringblockwatch.block.SettingsWeatherActivity;
+import rkr.wear.stringblockwatch.block.SettingsFitActivity;
 
 public class SettingsManager {
 
@@ -155,6 +156,8 @@ public class SettingsManager {
                 return SettingsDateActivity.class;
             case "Weather":
                 return SettingsWeatherActivity.class;
+            case "Fit":
+                return SettingsFitActivity.class;
             default:
                 return Object.class;
         }

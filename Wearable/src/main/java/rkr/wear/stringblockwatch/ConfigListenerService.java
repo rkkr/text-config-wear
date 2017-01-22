@@ -29,7 +29,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DigitalWatchFaceConfigListenerService extends WearableListenerService {
+public class ConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
     public static final String SETTINGS_PATH = "/watch_face_config";
     public static final String HTTP_PROXY_PATH = "/watch_face_proxy";

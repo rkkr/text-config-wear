@@ -139,4 +139,8 @@
         <item>City</item>
         <item>Coordinates</item>
     </string-array>
+    <string-array name="fit_value" >
+        <item>Steps</item>
+        <item>Distance</item>
+    </string-array>
 </resources>

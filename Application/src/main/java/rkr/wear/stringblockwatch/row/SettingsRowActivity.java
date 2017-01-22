@@ -1,6 +1,7 @@
 package rkr.wear.stringblockwatch.row;
 
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.wearable.companion.WatchFaceCompanion;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import rkr.wear.stringblockwatch.R;
+import rkr.wear.stringblockwatch.block.SettingsFitActivity;
 import rkr.wear.stringblockwatch.common.SettingsCommon;
 import rkr.wear.stringblockwatch.block.SettingsDateActivity;
 import rkr.wear.stringblockwatch.common.SettingsSharedFragment;
@@ -61,6 +64,7 @@ public class SettingsRowActivity extends SettingsCommon {
         final TextView dateButton = (TextView) findViewById(R.id.settings_fab_date);
         final TextView textButton = (TextView) findViewById(R.id.settings_fab_text);
         final TextView weatherButton = (TextView) findViewById(R.id.settings_fab_weather);
+        final TextView fitButton = (TextView) findViewById(R.id.settings_fab_fit);
         final float scale = getResources().getDisplayMetrics().density;
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -69,10 +73,12 @@ public class SettingsRowActivity extends SettingsCommon {
                 if (!fabExpanded){
                     fabExpanded = true;
                     ViewCompat.animate(fab).rotation(45.0F).setDuration(300).start();
+                    ViewCompat.animate(fitButton).alpha(1).yBy(-275 * scale).setDuration(300);
                     ViewCompat.animate(weatherButton).alpha(1).yBy(-225 * scale).setDuration(300);
                     ViewCompat.animate(timeButton).alpha(1).yBy(-175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(1).yBy(-125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(1).yBy(-75 * scale).setDuration(300);
+                    fitButton.setClickable(true);
                     weatherButton.setClickable(true);
                     timeButton.setClickable(true);
                     dateButton.setClickable(true);
@@ -80,10 +86,12 @@ public class SettingsRowActivity extends SettingsCommon {
                 } else {
                     fabExpanded = false;
                     ViewCompat.animate(fab).rotation(0.0F).setDuration(300).start();
+                    ViewCompat.animate(fitButton).alpha(0).yBy(275 * scale).setDuration(300);
                     ViewCompat.animate(weatherButton).alpha(0).yBy(225 * scale).setDuration(300);
                     ViewCompat.animate(timeButton).alpha(0).yBy(175 * scale).setDuration(300);
                     ViewCompat.animate(dateButton).alpha(0).yBy(125 * scale).setDuration(300);
                     ViewCompat.animate(textButton).alpha(0).yBy(75 * scale).setDuration(300);
+                    fitButton.setClickable(false);
                     weatherButton.setClickable(false);
                     timeButton.setClickable(false);
                     dateButton.setClickable(false);
@@ -167,6 +175,25 @@ public class SettingsRowActivity extends SettingsCommon {
                 onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(v.getContext()), keys);
             }
         });
+
+        fitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PreferenceManager.getDefaultSharedPreferences(v.getContext()).unregisterOnSharedPreferenceChangeListener(SettingsRowActivity.this);
+
+                int itemNum = mSettings.AddRowItem(mRowId, "Fit");
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit();
+                HashSet<String> keys = SettingsFitActivity.PreferencesFragment.SaveDefaultSettings(editor, mWatchId, mRowId, itemNum);
+                editor.commit();
+
+                Intent intent = new Intent(v.getContext(), SettingsFitActivity.class);
+                intent.putExtra("ROW_ID", mRowId);
+                intent.putExtra("ITEM_ID", itemNum);
+                intent.putExtra(WatchFaceCompanion.EXTRA_PEER_ID, mWatchId);
+                v.getContext().startActivity(intent);
+                onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(v.getContext()), keys);
+            }
+        });
     }
 
     @Override
@@ -180,9 +207,12 @@ public class SettingsRowActivity extends SettingsCommon {
             TextView dateButton = (TextView) findViewById(R.id.settings_fab_date);
             TextView textButton = (TextView) findViewById(R.id.settings_fab_text);
             TextView weatherButton = (TextView) findViewById(R.id.settings_fab_weather);
+            TextView fitButton = (TextView) findViewById(R.id.settings_fab_fit);
             float scale = getResources().getDisplayMetrics().density;
 
             fab.setRotation(0.0F);
+            fitButton.setAlpha(0);
+            fitButton.setY(275 * scale + weatherButton.getY());
             weatherButton.setAlpha(0);
             weatherButton.setY(225 * scale + weatherButton.getY());
             timeButton.setAlpha(0);
@@ -195,6 +225,7 @@ public class SettingsRowActivity extends SettingsCommon {
             dateButton.setClickable(false);
             textButton.setClickable(false);
             weatherButton.setClickable(false);
+            fitButton.setClickable(false);
         }
     }
 
@@ -306,22 +337,22 @@ public class SettingsRowActivity extends SettingsCommon {
             }
         }
 
-        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum)
+        public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, int rowNum, String mWatchId)
         {
             HashSet<String> keys = new HashSet<String>();
-            keys.add("row_" + rowNum + "_align");
-            preferences.putString("row_" + rowNum + "_align", "Center");
-            keys.add("row_" + rowNum + "_padding_left");
-            preferences.putString("row_" + rowNum + "_padding_left", "10");
-            keys.add("row_" + rowNum + "_padding_right");
-            preferences.putString("row_" + rowNum + "_padding_right", "10");
-            keys.add("row_" + rowNum + "_padding_top");
-            preferences.putString("row_" + rowNum + "_padding_top", "10");
-            keys.add("row_" + rowNum + "_padding_bottom");
-            preferences.putString("row_" + rowNum + "_padding_bottom", "10");
+            keys.add(mWatchId + "_row_" + rowNum + "_align");
+            preferences.putString(mWatchId + "_row_" + rowNum + "_align", "Center");
+            keys.add(mWatchId + "_row_" + rowNum + "_padding_left");
+            preferences.putString(mWatchId + "_row_" + rowNum + "_padding_left", "10");
+            keys.add(mWatchId + "_row_" + rowNum + "_padding_right");
+            preferences.putString(mWatchId + "_row_" + rowNum + "_padding_right", "10");
+            keys.add(mWatchId + "_row_" + rowNum + "_padding_top");
+            preferences.putString(mWatchId + "_row_" + rowNum + "_padding_top", "10");
+            keys.add(mWatchId + "_row_" + rowNum + "_padding_bottom");
+            preferences.putString(mWatchId + "_row_" + rowNum + "_padding_bottom", "10");
 
             //default keys
-            keys.add("rows");
+            keys.add(mWatchId + "_rows");
 
             return keys;
         }

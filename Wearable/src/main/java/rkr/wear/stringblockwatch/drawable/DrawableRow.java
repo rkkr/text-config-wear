@@ -41,6 +41,9 @@ public class DrawableRow {
                 case "Weather":
                     drawableItems.add(new DrawableWeather(context, rowIndex, itemNum));
                     break;
+                case "Fit":
+                    drawableItems.add(new DrawableFit(context, rowIndex, itemNum));
+                    break;
                 default:
                     Log.e("StringWatch", "Unknown item type: " + itemType);
             }

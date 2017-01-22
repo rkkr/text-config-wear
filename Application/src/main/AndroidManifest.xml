@@ -93,6 +93,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".block.SettingsFitActivity"
+            android:label="Fit Settings">
+            <intent-filter>
+                <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".settings.ImportActivity"
             android:label="Import and Export" />
         <service

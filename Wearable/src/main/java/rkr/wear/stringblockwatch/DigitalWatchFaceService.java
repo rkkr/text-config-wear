@@ -42,9 +42,16 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.fitness.data.DataPoint;
+import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -52,23 +59,20 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.List;
+
 import rkr.wear.stringblockwatch.drawable.DrawableScreen;
 
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
 
     private static final long NORMAL_UPDATE_RATE_MS = 1000;
-    //private static GoogleApiClient mGoogleApiClient;
     private static Node phoneNode;
 
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
-
-    //public static GoogleApiClient getGoogleApiClient() {
-    //    return mGoogleApiClient;
-    //}
 
     public static Node getPhoneNode() {
         return phoneNode;
@@ -80,7 +84,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements
             GoogleApiClient.ConnectionCallbacks,
-            LocationListener {
+            LocationListener,
+            ResultCallback<DailyTotalResult>{
 
         static final int MSG_UPDATE_TIME = 0;
         final Handler mUpdateTimeHandler = new Handler() {
@@ -119,6 +124,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         boolean mIsRound;
         boolean mIsAmbient;
         boolean needWeather;
+        boolean needFit;
         String peekCardMode;
         Paint blackPaint;
         DrawableScreen drawableScreen;
@@ -135,6 +141,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                     .addApi(LocationServices.API)
                     .addApi(Wearable.API)
+                    .addApi(Fitness.HISTORY_API)
+                    .addApi(Fitness.RECORDING_API)
+                    //.addScope(new Scope(Scopes.FITNESS_LOCATION_READ))
+                    //.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
+                    .useDefaultAccount()
                     .addConnectionCallbacks(this)
                     .build();
         }
@@ -173,6 +184,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             //registerWeatherReceiver();
             registerLocationReceiver();
+            registerFitReceiver();
         }
 
         /*private void registerWeatherReceiver() {
@@ -200,6 +212,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             //unregisterWeatherReceiver();
             unregisterLocationReceiver();
+            unregisterFitReceiver();
         }
 
         /*private void unregisterWeatherReceiver() {
@@ -293,7 +306,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     .setShowSystemUiTime(false)
                     .build());
 
-            needWeather = drawableScreen.NeedsLocationAccess();
+            needWeather = drawableScreen.NeedsWeatherAccess();
+            needFit = drawableScreen.NeedsFitAccess(); //needs location access?
+
             //check if weather block is added and request location access
             if (needWeather && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                     ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -304,11 +319,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             invalidate();
             registerLocationReceiver();
+            registerFitReceiver();
         }
 
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             registerLocationReceiver();
+            registerFitReceiver();
 
             Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
                 @Override
@@ -318,6 +335,38 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         return;
                     }
                     phoneNode = getConnectedNodesResult.getNodes().get(0);
+                }
+            });
+        }
+
+        private void registerFitReceiver() {
+            if (!needFit)
+                return;
+
+            Log.d(TAG, "Registering for fitness");
+            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+                return;
+
+            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA);
+            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
+
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(this);
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(this);
+
+            Fitness.RecordingApi.subscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+                    if (!status.isSuccess()) {
+                        Log.i(TAG, "Fit request failed: " + status.getStatusMessage());
+                    }
+                }
+            });
+            Fitness.RecordingApi.subscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+                    if (!status.isSuccess()) {
+                        Log.i(TAG, "Fit request failed: " + status.getStatusMessage());
+                    }
                 }
             });
         }
@@ -348,6 +397,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     }
                 }
             });
+        }
+
+        private void unregisterFitReceiver() {
+            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+                return;
+            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA);
+            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
         }
 
         private void unregisterLocationReceiver() {
@@ -387,6 +443,41 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             //Intent intent = new Intent();
             //intent.setAction("rkr.wear.stringblockwatch.WEATHER_UPDATE");
             //sendBroadcast(intent);
+        }
+
+        @Override
+        public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
+            Log.d(TAG, "Fit update");
+
+            if (!dailyTotalResult.getStatus().isSuccess()) {
+                Log.e(TAG, "Fit error: " + dailyTotalResult.getStatus().getStatusMessage());
+                return;
+            }
+
+            List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+
+            if (points.isEmpty()) {
+                Log.e(TAG, "Fit data empty");
+                return;
+            }
+
+            //float mDistanceTotal = points.get(0).getValue(Field.FIELD_DISTANCE).asFloat();
+            //int mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
+            //Log.d(TAG, "distance updated: " + mDistanceTotal);
+            //Log.d(TAG, "steps updated: " + mStepsTotal);
+
+
+
+            SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+            if (points.get(0).getDataType().getFields().contains(Field.FIELD_DISTANCE)) {
+                prefs.putFloat("fit_distance", points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
+                Log.d(TAG, "distance updated: " + points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
+            }
+            if (points.get(0).getDataType().getFields().contains(Field.FIELD_STEPS)) {
+                prefs.putInt("fit_steps", points.get(0).getValue(Field.FIELD_STEPS).asInt());
+                Log.d(TAG, "steps updated: " + points.get(0).getValue(Field.FIELD_STEPS).asInt());
+            }
+            prefs.commit();
         }
     }
 }
