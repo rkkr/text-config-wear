@@ -15,8 +15,13 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
+        fragment.mRowId = mRowId;
+        fragment.mItemId = mItemId;
+
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
+                .replace(android.R.id.content, fragment)
                 .commit();
     }
 
@@ -24,10 +29,13 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
+            super.onCreate(savedInstanceState);
+
+            Preference tribute = AddPreference(defaultCategory, null);
+            tribute.setSummary("Weather information provided by openweathermap.org");
 
             ListPreference valuePref = AddListPreference(defaultCategory, "Weather value", "value", R.array.weather_item);
-            String weatherValue = getPreferenceManager().getSharedPreferences().getString("row_" + rowNum + "_item_" + itemNum + "_value", "Temperature");
+            String weatherValue = getPreferenceManager().getSharedPreferences().getString(mWatchId + "_row_" + mRowId + "_item_" + mItemId + "_value", "Temperature");
             final ListPreference unitsPref = AddListPreference(defaultCategory, "Units", "units", getResource(weatherValue));
             unitsPref.setEnabled(enableUnits(weatherValue));
             AddSwitchPreference(defaultCategory, "Append units", "show_units");
@@ -54,6 +62,9 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
                         case "Sunset":
                             unitsPref.setValue("Time (24H)");
                             break;
+                        case "Location":
+                            unitsPref.setValue("City");
+                            break;
                         default:
                             return false;
                     }
@@ -73,6 +84,8 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
                 case "Sunrise":
                 case "Sunset":
                     return R.array.weather_sun_units;
+                case "Location":
+                    return R.array.weather_location_units;
             }
             return R.array.weather_temp_units;
         }
@@ -84,6 +97,7 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
                 case "Wind Speed":
                 case "Sunrise":
                 case "Sunset":
+                case "Location":
                     return true;
             }
             return false;

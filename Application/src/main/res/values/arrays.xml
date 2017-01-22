@@ -135,4 +135,8 @@
         <item>Time (12H)</item>
         <item>Time remaining</item>
     </string-array>
+    <string-array name="weather_location_units" >
+        <item>City</item>
+        <item>Coordinates</item>
+    </string-array>
 </resources>

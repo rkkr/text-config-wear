@@ -14,19 +14,24 @@ public class SettingsDateActivity extends SettingsItemCommon {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
+        fragment.mRowId = mRowId;
+        fragment.mItemId = mItemId;
+
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
-                .commit();
+                .replace(android.R.id.content, fragment)
+                .commit();;
     }
 
     public static class PreferencesFragment extends SettingsItemFragment {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
+            super.onCreate(savedInstanceState);
 
             ListPreference valuePref = AddListPreference(defaultCategory, "Date value", "value", R.array.date_item);
-            String dateValue = getPreferenceManager().getSharedPreferences().getString("row_" + rowNum + "_item_" + itemNum + "_value", "Year (YYYY)");
+            String dateValue = getPreferenceManager().getSharedPreferences().getString(mWatchId + "_row_" + mRowId + "_item_" + mItemId + "_value", "Year (YYYY)");
             final ListPreference formatPref = AddListPreference(defaultCategory, "Display format", "format", getResource(dateValue));
             valuePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override

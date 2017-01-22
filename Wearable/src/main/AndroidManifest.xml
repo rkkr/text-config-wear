@@ -52,13 +52,7 @@
 
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
-        </service>
-
-        <!--
-             All intent-filters for config actions must include the categories
-            com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION
-            and android.intent.category.DEFAULT.
-        -->
+        </service>W
 
         <service
             android:name=".DigitalWatchFaceConfigListenerService">
@@ -74,7 +68,8 @@
 
         <activity
             android:name=".PermissionActivity"
-            android:label="@string/title_activity_permission"></activity>
+            android:label="@string/title_activity_permission">
+        </activity>
     </application>
 
 </manifest>

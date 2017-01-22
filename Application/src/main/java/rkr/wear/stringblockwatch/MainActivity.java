@@ -7,6 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.wearable.companion.WatchFaceCompanion;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -25,8 +26,11 @@ public class MainActivity extends SettingsCommon {
 
         setContentView(R.layout.settings_fab);
 
+        PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
+
         getFragmentManager().beginTransaction()
-                .replace(R.id.fragment, new PreferencesFragment())
+                .replace(R.id.fragment, fragment)
                 .commit();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.settings_fab);
@@ -42,6 +46,7 @@ public class MainActivity extends SettingsCommon {
 
                 Intent intent = new Intent(view.getContext(), SettingsRowActivity.class);
                 intent.putExtra("ROW_ID", rowNum);
+                intent.putExtra(WatchFaceCompanion.EXTRA_PEER_ID, mWatchId);
                 view.getContext().startActivity(intent);
                 onSharedPreferenceChanged(PreferenceManager.getDefaultSharedPreferences(view.getContext()), keys);
             }
@@ -49,7 +54,7 @@ public class MainActivity extends SettingsCommon {
 
         if (!mSettings.HasSettings()) {
             //We are started for the first time or app settings have been cleared
-            ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext());
+            ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext(), mWatchId);
             ImportActivity.ImportCommonSettings(getApplicationContext());
         }
     }
@@ -62,13 +67,23 @@ public class MainActivity extends SettingsCommon {
 
             addPreferencesFromResource(R.xml.pref_general);
 
-            super.Create(mPhoneId);
-
             Preference advanced = findPreference("advanced");
             advanced.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(getView().getContext(), AdvancedActivity.class);
+                    intent.putExtra(WatchFaceCompanion.EXTRA_PEER_ID, mWatchId);
+                    getView().getContext().startActivity(intent);
+                    return true;
+                }
+            });
+
+            Preference importSample = findPreference("import");
+            importSample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getView().getContext(), ImportActivity.class);
+                    intent.putExtra(WatchFaceCompanion.EXTRA_PEER_ID, mWatchId);
                     getView().getContext().startActivity(intent);
                     return true;
                 }
@@ -78,16 +93,6 @@ public class MainActivity extends SettingsCommon {
         @Override
         public void onResume() {
             super.onResume();
-
-            Preference importSample = findPreference("import");
-            importSample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent(getView().getContext(), ImportActivity.class);
-                    getView().getContext().startActivity(intent);
-                    return true;
-                }
-            });
 
             ArrayList<Integer> rows = mSettings.GetRows();
             PreferenceCategory category = (PreferenceCategory)findPreference("rows");
@@ -110,6 +115,7 @@ public class MainActivity extends SettingsCommon {
                     public boolean onPreferenceClick(Preference preference) {
                         Intent intent = new Intent(getView().getContext(), SettingsRowActivity.class);
                         intent.putExtra("ROW_ID", row);
+                        intent.putExtra(WatchFaceCompanion.EXTRA_PEER_ID, mWatchId);
                         getView().getContext().startActivity(intent);
                         return true;
                     }

@@ -17,7 +17,8 @@ import rkr.wear.stringblockwatch.R;
 
 public class WatchActionPickerActivity extends DialogFragment {
 
-    public String fileName = null;
+    public String fileName;
+    public String mWatchId;
     private ImportActivity.RefreshCallback mCallback;
 
     public WatchActionPickerActivity() {
@@ -35,11 +36,11 @@ public class WatchActionPickerActivity extends DialogFragment {
                 String item = (String) list.getItemAtPosition(position);
                 switch (item) {
                     case "Import":
-                        ImportActivity.ImportWatch(fileName, view.getContext());
+                        ImportActivity.ImportWatch(fileName, view.getContext(), mWatchId);
                         getDialog().dismiss();
                         break;
                     case "Overwrite":
-                        ImportActivity.ExportWatch(fileName, view.getContext());
+                        ImportActivity.ExportWatch(fileName, view.getContext(), mWatchId);
                         mCallback.onRefreshCallback();
                         getDialog().dismiss();
                         break;

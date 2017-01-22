@@ -5,15 +5,18 @@ import android.os.Bundle;
 
 import java.util.HashSet;
 
-import rkr.wear.stringblockwatch.common.SettingsCommon;
-
 public class SettingsTextActivity extends SettingsItemCommon {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
+        fragment.mRowId = mRowId;
+        fragment.mItemId = mItemId;
+
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
+                .replace(android.R.id.content, fragment)
                 .commit();
     }
 
@@ -21,7 +24,7 @@ public class SettingsTextActivity extends SettingsItemCommon {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
+            super.onCreate(savedInstanceState);
 
             AddEditTextPreference(defaultCategory, "Text", "value");
         }

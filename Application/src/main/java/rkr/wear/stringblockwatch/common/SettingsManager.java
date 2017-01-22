@@ -17,24 +17,24 @@ import rkr.wear.stringblockwatch.block.SettingsWeatherActivity;
 
 public class SettingsManager {
 
-    private String phoneId;
+    private String watchId;
     private Context context;
 
-    public SettingsManager(Context context, String phoneId) {
+    public SettingsManager(Context context, String watchId) {
         this.context = context;
-        this.phoneId = phoneId;
-        if (phoneId == null)
+        this.watchId = watchId;
+        if (watchId == null)
             Log.e("SettingManager", "Phone ID unavailable");
     }
 
     public boolean HasSettings()
     {
-        return PreferenceManager.getDefaultSharedPreferences(context).contains(phoneId + "_rows");
+        return PreferenceManager.getDefaultSharedPreferences(context).contains(watchId + "_rows");
     }
 
     public ArrayList<Integer> GetRows()
     {
-        String rowItems = PreferenceManager.getDefaultSharedPreferences(context).getString(phoneId + "_rows", "");
+        String rowItems = PreferenceManager.getDefaultSharedPreferences(context).getString(watchId + "_rows", "");
         ArrayList<Integer> list = new ArrayList<Integer>();
         if (!rowItems.equals(""))
             for (String item: rowItems.split(","))
@@ -45,12 +45,12 @@ public class SettingsManager {
     public void SaveRows(ArrayList<Integer> list)
     {
         String rows = TextUtils.join(",", list);
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(phoneId + "_rows", rows).commit();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(watchId + "_rows", rows).commit();
     }
 
     public ArrayList<Integer> GetRowItems(int rowNum)
     {
-        String rowItems = PreferenceManager.getDefaultSharedPreferences(context).getString(phoneId + "_row_" + rowNum + "_items", "");
+        String rowItems = PreferenceManager.getDefaultSharedPreferences(context).getString(watchId + "_row_" + rowNum + "_items", "");
         ArrayList<Integer> list = new ArrayList<Integer>();
         if (!rowItems.equals(""))
             for (String item: rowItems.split(","))
@@ -61,7 +61,7 @@ public class SettingsManager {
     public void SaveRowItems(int rowNum, ArrayList<Integer> list)
     {
         String rowItems = TextUtils.join(",", list);
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(phoneId + "_row_" + rowNum + "_items", rowItems).commit();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(watchId + "_row_" + rowNum + "_items", rowItems).commit();
     }
 
     public int AddRow()
@@ -88,7 +88,7 @@ public class SettingsManager {
         max++;
         items.add(max);
         SaveRowItems(rowNum, items);
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(phoneId + "_row_" + rowNum + "_item_" + max + "_type", itemType).commit();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(watchId + "_row_" + rowNum + "_item_" + max + "_type", itemType).commit();
 
         return max;
     }
@@ -99,12 +99,12 @@ public class SettingsManager {
         HashSet<String> keys = new HashSet<String>();
         rowItems.remove(rowItems.indexOf(itemNum));
         SaveRowItems(rowNum, rowItems);
-        keys.add(phoneId + "_row_" + rowNum + "_items");
+        keys.add(watchId + "_row_" + rowNum + "_items");
 
         Set<String> prefKeys = PreferenceManager.getDefaultSharedPreferences(context).getAll().keySet();
         SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
         for (String key : prefKeys)
-            if (key.startsWith(phoneId + "_row_" + rowNum + "_item_" + itemNum)) {
+            if (key.startsWith(watchId + "_row_" + rowNum + "_item_" + itemNum)) {
                 preferences.remove(key);
                 keys.add(key);
             }
@@ -119,12 +119,12 @@ public class SettingsManager {
         HashSet<String> keys = new HashSet<String>();
         rows.remove(rows.indexOf(rowNum));
         SaveRows(rows);
-        keys.add(phoneId + "_rows");
+        keys.add(watchId + "_rows");
 
         Set<String> prefKeys = PreferenceManager.getDefaultSharedPreferences(context).getAll().keySet();
         SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
         for (String key : prefKeys)
-            if (key.startsWith(phoneId + "_row_" + rowNum + "_")) {
+            if (key.startsWith(watchId + "_row_" + rowNum + "_")) {
                 preferences.remove(key);
                 keys.add(key);
             }
@@ -135,12 +135,12 @@ public class SettingsManager {
 
     public String GetRowItemType(int rowNum, int itemNum)
     {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_type", "");
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(watchId + "_row_" + rowNum + "_item_" + itemNum + "_type", "");
     }
 
     public String GetRowItemValue(int rowNum, int itemNum)
     {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value", null);
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(watchId + "_row_" + rowNum + "_item_" + itemNum + "_value", null);
     }
 
     public static Class GetRowItemClass(String itemType)

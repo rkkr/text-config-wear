@@ -49,6 +49,7 @@ public class ImportActivity extends SettingsCommon {
         setContentView(R.layout.settings_fab);
 
         final PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragment, fragment)
                 .commit();
@@ -60,6 +61,7 @@ public class ImportActivity extends SettingsCommon {
                 FragmentManager fm = getFragmentManager();
                 WatchNamePickerActivity editNameDialog = new WatchNamePickerActivity();
                 editNameDialog.setOnRefreshCallback(fragment.mRefreshCallback);
+                editNameDialog.mWatchId = mWatchId;
                 editNameDialog.show(fm, "watch_name_picker");
             }
         });
@@ -95,7 +97,7 @@ public class ImportActivity extends SettingsCommon {
         file.delete();
     }
 
-    public static void ImportWatch(String fileName, Context context) {
+    public static void ImportWatch(String fileName, Context context, String mWatchId) {
         try {
             File file = GetWatchFile(context, fileName);
             if (!file.exists()) {
@@ -104,7 +106,7 @@ public class ImportActivity extends SettingsCommon {
             }
 
             FileInputStream inputStream = new FileInputStream(file);
-            ImportWatch(inputStream, context);
+            ImportWatch(inputStream, context, mWatchId);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -123,7 +125,7 @@ public class ImportActivity extends SettingsCommon {
         editor.commit();
     }
 
-    public static void ImportWatch(InputStream inputStream, Context context)
+    public static void ImportWatch(InputStream inputStream, Context context, String mWatchId)
     {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
@@ -143,22 +145,28 @@ public class ImportActivity extends SettingsCommon {
 
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
             for (String key : PreferenceManager.getDefaultSharedPreferences(context).getAll().keySet())
-                if (key.startsWith(mPhoneId))
+                if (key.startsWith(mWatchId))
                     editor.remove(key);
 
             for (Iterator<String> keys = jObject.keys(); keys.hasNext(); ) {
                 String key = keys.next();
                 Object value = jObject.get(key);
-                key = mPhoneId + "_" + key;
+                key = mWatchId + "_" + key;
 
                 if (value instanceof JSONArray) {
-                    JSONArray array = (JSONArray)value;
+                    JSONArray array = (JSONArray) value;
                     HashSet<String> _value = new HashSet<String>();
-                    for (int i=0; i<array.length(); i++)
+                    for (int i = 0; i < array.length(); i++)
                         _value.add(array.getString(i));
                     editor.putStringSet(key, _value);
-                } else {
+                } if (value instanceof Boolean) {
+                    editor.putBoolean(key, (Boolean) value);
+                } if (value instanceof Integer) {
+                    editor.putInt(key, (Integer) value);
+                } if (value instanceof String) {
                     editor.putString(key, (String) value);
+                } else {
+                    Log.e("ImportActivity", "Unsupported item to import");
                 }
             }
 
@@ -175,7 +183,7 @@ public class ImportActivity extends SettingsCommon {
         }
     }
 
-    public static void ExportWatch(String fileName, Context context)
+    public static void ExportWatch(String fileName, Context context, String mWatchId)
     {
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())) {
             Toast.makeText(context, "External storage not available", Toast.LENGTH_LONG).show();
@@ -187,7 +195,7 @@ public class ImportActivity extends SettingsCommon {
         Map<String, ?> settings = PreferenceManager.getDefaultSharedPreferences(context).getAll();
         try {
             for (String key : settings.keySet()) {
-                if (key.startsWith(mPhoneId))
+                if (key.startsWith(mWatchId))
                     continue;
                 Object item = settings.get(key);
                 if (item instanceof Set) {
@@ -236,18 +244,20 @@ public class ImportActivity extends SettingsCommon {
 
     public static class PreferencesFragment extends PreferenceFragment {
 
-        private PreferenceScreen mScreen;
+        private Context mContext;
+        public String mWatchId;
+
         public RefreshCallback mRefreshCallback = new RefreshCallback() {
             @Override
             public void onRefreshCallback() {
                 PreferenceCategory category = (PreferenceCategory)findPreference("watches_saved");
                 category.removeAll();
 
-                List<String> watches = ListSavedWatches(mScreen.getContext());
+                List<String> watches = ListSavedWatches(mContext);
                 for (final String watch : watches) {
                     if (!watch.endsWith(".json"))
                         continue;
-                    Preference pref = new Preference(mScreen.getContext());
+                    Preference pref = new Preference(mContext);
                     pref.setTitle(watch.substring(0, watch.lastIndexOf(".json")));
 
                     pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -256,6 +266,7 @@ public class ImportActivity extends SettingsCommon {
                             FragmentManager fm = getFragmentManager();
                             WatchActionPickerActivity actionDialog = new WatchActionPickerActivity();
                             actionDialog.fileName = watch;
+                            actionDialog.mWatchId = mWatchId;
                             actionDialog.setOnRefreshCallback(mRefreshCallback);
                             actionDialog.show(fm, "watch_action_picker");
                             return true;
@@ -276,7 +287,7 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample1), preference.getContext());
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample1), preference.getContext(), mWatchId);
                     return true;
                 }
             });
@@ -284,7 +295,7 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext());
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext(), mWatchId);
                     return true;
                 }
             });
@@ -292,12 +303,12 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext());
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext(), mWatchId);
                     return true;
                 }
             });
 
-            mScreen = this.getPreferenceScreen();
+            mContext = this.getPreferenceScreen().getContext();
             mRefreshCallback.onRefreshCallback();
         }
     }

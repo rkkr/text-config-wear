@@ -58,7 +58,17 @@ public class DrawableWeather extends DrawableItemCommon {
                 }
                 break;
             case "Location":
-                return prefs.getString("weather_city", "-");
+                switch (units) {
+                    case "City":
+                        return prefs.getString("weather_city", "-");
+                    case "Coordinates":
+                        if (prefs.contains("weather_lat") && prefs.contains("weather_lon")) {
+                            float lat = prefs.getFloat("weather_lat", 0);
+                            float lon = prefs.getFloat("weather_lon", 0);
+                            return String.format(Locale.US, "Lat:%.2f Lon:%.2f", lat, lon);
+                        }
+                }
+                break;
             case "Pressure":
                 if (prefs.contains("weather_pressure"))
                     return Integer.toString(prefs.getInt("weather_pressure", 0)) + (showUnits ? "hpa" : "");
@@ -87,11 +97,11 @@ public class DrawableWeather extends DrawableItemCommon {
                             return calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE);
                         case "Time remaining":
                             long remaining = calendar.getTimeInMillis() - System.currentTimeMillis();
+                            while (remaining < 0)
+                                remaining += 1000 * 60 * 60 * 24;
                             long minutes = remaining / 1000 / 60 % 60;
                             long hours = remaining / 1000 / 60 / 60 % 24;
-                            if (hours < 0)
-                                hours += 24;
-                            return hours + ":" + minutes;
+                            return String.format(Locale.US, "%d:%02d", hours, minutes);
                     }
                 break;
             case "Sunset":
@@ -104,11 +114,11 @@ public class DrawableWeather extends DrawableItemCommon {
                             return calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE);
                         case "Time remaining":
                             long remaining = calendar.getTimeInMillis() - System.currentTimeMillis();
+                            while (remaining < 0)
+                                remaining += 1000 * 60 * 60 * 24;
                             long minutes = remaining / 1000 / 60 % 60;
                             long hours = remaining / 1000 / 60 / 60 % 24;
-                            if (hours < 0)
-                                hours += 24;
-                            return hours + ":" + minutes;
+                            return String.format(Locale.US, "%d:%02d", hours, minutes);
                 }
                 break;
             case "Update Time":

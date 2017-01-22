@@ -53,22 +53,23 @@ public class SettingsCommon extends AppCompatActivity
     private static final String PATH_WITH_FEATURE = "/watch_face_config";
 
     private GoogleApiClient mGoogleApiClient;
-    public static String mPhoneId;
+    public String mWatchId;
     public SettingsManager mSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getIntent().hasExtra(WatchFaceCompanion.EXTRA_PEER_ID))
-            mPhoneId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
+        if (!getIntent().hasExtra(WatchFaceCompanion.EXTRA_PEER_ID))
+            displayNoConnectedDeviceDialog();
+        mWatchId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
 
-        mSettings = new SettingsManager(getApplicationContext(), mPhoneId);
+        mSettings = new SettingsManager(getApplicationContext(), mWatchId);
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -126,7 +127,7 @@ public class SettingsCommon extends AppCompatActivity
             Log.d(TAG, "onConnected: " + connectionHint);
         }
 
-        if (mPhoneId == null) {
+        if (mWatchId == null) {
             displayNoConnectedDeviceDialog();
         }
     }
@@ -171,18 +172,18 @@ public class SettingsCommon extends AppCompatActivity
         Map<String, ?> prefs = sharedPreferences.getAll();
 
         for (String key : keys) {
-            if (!key.startsWith(mPhoneId + "_") && !key.startsWith("common_")) {
+            if (!key.startsWith(mWatchId + "_") && !key.startsWith("common_")) {
                 Log.e(TAG, "Setting not for phone used: " + key);
                 continue;
             }
 
             if (!sharedPreferences.contains(key)) {
-                config.putString(key.replace(mPhoneId, ""), null);
+                config.putString(key.replace(mWatchId, ""), null);
                 continue;
             }
 
             Object pref = prefs.get(key);
-            key = key.replace(mPhoneId + "_", "");
+            key = key.replace(mWatchId + "_", "");
             if (pref instanceof String)
                 config.putString(key, (String) pref);
             else if (pref instanceof Boolean)
@@ -207,9 +208,9 @@ public class SettingsCommon extends AppCompatActivity
     }
 
     private void sendConfigUpdateMessage(DataMap config) {
-        if (mPhoneId != null) {
+        if (mWatchId != null) {
             byte[] rawData = config.toByteArray();
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPhoneId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mWatchId, PATH_WITH_FEATURE, rawData).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                 @Override
                 public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
                     Log.d("Settings", "Send message: " + sendMessageResult.getStatus().getStatusMessage());

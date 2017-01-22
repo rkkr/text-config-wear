@@ -14,8 +14,13 @@ public class SettingsTimeActivity extends SettingsItemCommon {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferencesFragment fragment = new PreferencesFragment();
+        fragment.mWatchId = mWatchId;
+        fragment.mRowId = mRowId;
+        fragment.mItemId = mItemId;
+
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
+                .replace(android.R.id.content, fragment)
                 .commit();
     }
 
@@ -23,7 +28,7 @@ public class SettingsTimeActivity extends SettingsItemCommon {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState, phoneId, rowNum, itemNum);
+            super.onCreate(savedInstanceState);
 
             ListPreference valuePref = AddListPreference(defaultCategory, "Time value", "value", R.array.time_value);
             final ListPreference formatPref = AddListPreference(defaultCategory, "Display format", "format", R.array.time_display);

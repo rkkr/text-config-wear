@@ -15,11 +15,9 @@ import rkr.wear.stringblockwatch.R;
 
 public class WatchNamePickerActivity extends DialogFragment {
 
-    public String fileName = null;
+    public String fileName;
+    public String mWatchId;
     private ImportActivity.RefreshCallback mCallback;
-
-    public WatchNamePickerActivity() {
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -76,7 +74,7 @@ public class WatchNamePickerActivity extends DialogFragment {
                                 Toast.makeText(view.getContext(), "Duplicate file name", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            ImportActivity.ExportWatch(text, view.getContext());
+                            ImportActivity.ExportWatch(text, view.getContext(), mWatchId);
                             mCallback.onRefreshCallback();
                             dialog.dismiss();
                             return;

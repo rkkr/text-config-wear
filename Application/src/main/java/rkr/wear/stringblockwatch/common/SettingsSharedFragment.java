@@ -1,8 +1,6 @@
 package rkr.wear.stringblockwatch.common;
 
-import android.app.FragmentManager;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -13,20 +11,11 @@ import android.preference.PreferenceGroup;
 import android.preference.SwitchPreference;
 import android.util.Log;
 
-import java.util.HashSet;
-import java.util.Locale;
-
 
 public class SettingsSharedFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public String phoneId;
+    public String mWatchId;
     public SettingsManager mSettings;
-
-    //@Override
-    public void Create(String phoneId) {
-        this.phoneId = phoneId;
-        this.mSettings = new SettingsManager(this.getPreferenceScreen().getContext(), phoneId);
-    }
 
     public Preference AddPreference(PreferenceCategory category, String title)
     {
@@ -84,8 +73,10 @@ public class SettingsSharedFragment extends PreferenceFragment implements Shared
     @Override
     public void onResume() {
         super.onResume();
-        getPreferenceScreen().getSharedPreferences()
-                .registerOnSharedPreferenceChangeListener(this);
+        if (mWatchId == null)
+            Log.e("SettingsSharedFragment", "watchID == null");
+        this.mSettings = new SettingsManager(getPreferenceScreen().getContext(), mWatchId);
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         initSummary(getPreferenceScreen());
     }
 
