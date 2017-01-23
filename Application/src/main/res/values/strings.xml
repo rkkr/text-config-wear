@@ -13,6 +13,6 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">String Block Watch</string>
+    <string name="app_name">Text Block Watch</string>
     <string name="title_no_device_connected">No wearable device is currently connected.</string>
 </resources>

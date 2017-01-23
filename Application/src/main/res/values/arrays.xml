@@ -142,5 +142,7 @@
     <string-array name="fit_value" >
         <item>Steps</item>
         <item>Distance</item>
+        <item>Active time</item>
+        <item>Calories</item>
     </string-array>
 </resources>

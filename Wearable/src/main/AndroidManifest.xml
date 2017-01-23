@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -67,8 +68,7 @@
         </service>
 
         <activity
-            android:name=".PermissionActivity"
-            android:label="@string/title_activity_permission">
+            android:name=".PermissionActivity">
         </activity>
     </application>
 

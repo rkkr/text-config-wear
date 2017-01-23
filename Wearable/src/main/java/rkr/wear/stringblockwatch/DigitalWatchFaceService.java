@@ -17,6 +17,8 @@
 package rkr.wear.stringblockwatch;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,11 +57,15 @@ import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import rkr.wear.stringblockwatch.drawable.DrawableScreen;
 
@@ -84,10 +90,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements
             GoogleApiClient.ConnectionCallbacks,
-            LocationListener,
-            ResultCallback<DailyTotalResult>{
+            LocationListener {
 
         static final int MSG_UPDATE_TIME = 0;
+        private static final String TAG = "WeatherService";
+        private static final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&units=metric&APPID=%s";
+        private static final String WEATHER_KEY = "e4cfc261b89dc243b2856b53cae142eb";
+
         final Handler mUpdateTimeHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -111,10 +120,22 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         final BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals("text.config.wear.SETTING_CHANGED"))
-                    updateUiForConfig(true);
-                else {
-                    invalidate();
+                switch (intent.getAction()) {
+                    case "text.config.wear.SETTING_CHANGED":
+                        updateUiForConfig(true);
+                        break;
+                    case Intent.ACTION_TIMEZONE_CHANGED:
+                    case Intent.ACTION_LOCALE_CHANGED:
+                        updateUiForConfig(false);
+                        break;
+                    case "text.config.wear.WEATHER_UPDATE":
+                        UpdateWeather();
+                        break;
+                    case "text.config.wear.FIT_UPDATE":
+                        FitUpdate();
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown event received: " + intent.getAction());
                 }
             }
         };
@@ -129,6 +150,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         Paint blackPaint;
         DrawableScreen drawableScreen;
         GoogleApiClient mGoogleApiClient;
+        long lastRequest = 0;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -178,28 +200,44 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
             filter.addAction("text.config.wear.SETTING_CHANGED");
+            filter.addAction("text.config.wear.WEATHER_UPDATE");
+            filter.addAction("text.config.wear.FIT_UPDATE");
             DigitalWatchFaceService.this.registerReceiver(mReceiver, filter);
 
             mGoogleApiClient.connect();
 
-            //registerWeatherReceiver();
+            registerWeatherReceiver();
             registerLocationReceiver();
             registerFitReceiver();
         }
 
-        /*private void registerWeatherReceiver() {
+        private void registerWeatherReceiver() {
             if (!needWeather)
                 return;
 
-            int REPEAT_TIME = 1000 * 60 * 1;
+            int REPEAT_TIME = 1000 * 60 * 15;
 
             AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
-            Intent serviceIntent = new Intent(getApplicationContext(), WeatherService.class);
-            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            final Intent weatherIntent = new Intent("text.config.wear.WEATHER_UPDATE");
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, weatherIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Calendar cal = Calendar.getInstance();
-            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), REPEAT_TIME, pending);
-        }*/
+            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis() + 1000 * 5, REPEAT_TIME, pending);
+        }
+
+        private void registerFitReceiver() {
+            if (!needFit)
+                return;
+
+            int REPEAT_TIME = 1000 * 60;
+
+            AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
+            final Intent weatherIntent = new Intent("text.config.wear.FIT_UPDATE");
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, weatherIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar cal = Calendar.getInstance();
+            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis() + 1000 * 5, REPEAT_TIME, pending);
+        }
 
         private void unregisterReceiver() {
             if (!mRegisteredReceiver) {
@@ -208,20 +246,28 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mRegisteredReceiver = false;
             DigitalWatchFaceService.this.unregisterReceiver(mReceiver);
 
-            mGoogleApiClient.disconnect();
-
-            //unregisterWeatherReceiver();
+            unregisterWeatherReceiver();
             unregisterLocationReceiver();
             unregisterFitReceiver();
+
+            mGoogleApiClient.disconnect();
         }
 
-        /*private void unregisterWeatherReceiver() {
+        private void unregisterWeatherReceiver() {
             AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
-            Intent serviceIntent = new Intent(getApplicationContext(), WeatherService.class);
-            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            final Intent weatherIntent = new Intent("text.config.wear.WEATHER_UPDATE");
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, weatherIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             service.cancel(pending);
-        }*/
+        }
+
+        private void unregisterFitReceiver() {
+            AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
+            final Intent weatherIntent = new Intent("text.config.wear.WEATHER_UPDATE");
+            PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, weatherIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            service.cancel(pending);
+        }
 
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
@@ -307,11 +353,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     .build());
 
             needWeather = drawableScreen.NeedsWeatherAccess();
-            needFit = drawableScreen.NeedsFitAccess(); //needs location access?
+            needFit = drawableScreen.NeedsFitAccess();
 
             //check if weather block is added and request location access
-            if (needWeather && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (needWeather && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Intent intent = new Intent(getApplicationContext(), PermissionActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
@@ -339,34 +384,76 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             });
         }
 
-        private void registerFitReceiver() {
+        private void FitUpdate() {
             if (!needFit)
                 return;
 
-            Log.d(TAG, "Registering for fitness");
             if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
                 return;
 
-            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA);
-            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
-
-            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(this);
-            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(this);
-
-            Fitness.RecordingApi.subscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<Status>() {
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
+            //Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
-                public void onResult(Status status) {
-                    if (!status.isSuccess()) {
-                        Log.i(TAG, "Fit request failed: " + status.getStatusMessage());
+                public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
+                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                        Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
+                        return;
                     }
+                    if (dailyTotalResult.getTotal() == null)
+                        return;
+                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                    prefs.putFloat("fit_distance", points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
+                    prefs.apply();
+                    Log.d(TAG, "distance: " + points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
                 }
             });
-            Fitness.RecordingApi.subscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(new ResultCallback<Status>() {
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
-                public void onResult(Status status) {
-                    if (!status.isSuccess()) {
-                        Log.i(TAG, "Fit request failed: " + status.getStatusMessage());
+                public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
+                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                        Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
+                        return;
                     }
+                    if (dailyTotalResult.getTotal() == null)
+                        return;
+                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                    prefs.putInt("fit_steps", points.get(0).getValue(Field.FIELD_STEPS).asInt());
+                    prefs.apply();
+                    Log.d(TAG, "steps: " + points.get(0).getValue(Field.FIELD_STEPS).asInt());
+                }
+            });
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_CALORIES_EXPENDED).setResultCallback(new ResultCallback<DailyTotalResult>() {
+                @Override
+                public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
+                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                        Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
+                        return;
+                    }
+                    if (dailyTotalResult.getTotal() == null)
+                        return;
+                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                    prefs.putFloat("fit_calories", points.get(0).getValue(Field.FIELD_CALORIES).asFloat());
+                    prefs.apply();
+                    Log.d(TAG, "calories: " + points.get(0).getValue(Field.FIELD_CALORIES).asFloat());
+                }
+            });
+            Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_ACTIVITY_SEGMENT).setResultCallback(new ResultCallback<DailyTotalResult>() {
+                @Override
+                public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
+                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                        Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
+                        return;
+                    }
+                    if (dailyTotalResult.getTotal() == null)
+                        return;
+                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                    prefs.putInt("fit_activity", points.get(0).getValue(Field.FIELD_DURATION).asInt());
+                    prefs.apply();
+                    Log.d(TAG, "activity: " + points.get(0).getValue(Field.FIELD_DURATION).asInt());
                 }
             });
         }
@@ -381,7 +468,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             LocationRequest locationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_LOW_POWER)
-                    .setInterval(1000 * 60 * 30)
+                    .setInterval(1000 * 60 * 60)
                     .setFastestInterval(1000 * 60 * 5);
 
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -397,13 +484,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     }
                 }
             });
-        }
-
-        private void unregisterFitReceiver() {
-            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
-                return;
-            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA);
-            Fitness.RecordingApi.unsubscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
         }
 
         private void unregisterLocationReceiver() {
@@ -434,50 +514,80 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                             return;
                         }
                         phoneNode = getConnectedNodesResult.getNodes().get(0);
-                        WeatherService.onReceive(getApplicationContext(), mGoogleApiClient);
+                        UpdateWeather();
                     }
                 });
 
 
-            WeatherService.onReceive(getApplicationContext(), mGoogleApiClient);
+            UpdateWeather();
             //Intent intent = new Intent();
             //intent.setAction("rkr.wear.stringblockwatch.WEATHER_UPDATE");
             //sendBroadcast(intent);
         }
 
-        @Override
-        public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
-            Log.d(TAG, "Fit update");
+        private void UpdateWeather() {
+            Log.d(TAG, "Calling weather update");
 
-            if (!dailyTotalResult.getStatus().isSuccess()) {
-                Log.e(TAG, "Fit error: " + dailyTotalResult.getStatus().getStatusMessage());
+            if (System.currentTimeMillis() - lastRequest < 1000 * 60) {
+                Log.d(TAG, "Not updating weather, timeout not passed");
                 return;
             }
 
-            List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-
-            if (points.isEmpty()) {
-                Log.e(TAG, "Fit data empty");
+            long lastUpdate = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("weather_update_time", 0);
+            if (System.currentTimeMillis() - lastUpdate < 1000 * 60 * 10) {
+                Log.d(TAG, "Not updating weather, timeout not passed");
                 return;
             }
 
-            //float mDistanceTotal = points.get(0).getValue(Field.FIELD_DISTANCE).asFloat();
-            //int mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
-            //Log.d(TAG, "distance updated: " + mDistanceTotal);
-            //Log.d(TAG, "steps updated: " + mStepsTotal);
-
-
-
-            SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-            if (points.get(0).getDataType().getFields().contains(Field.FIELD_DISTANCE)) {
-                prefs.putFloat("fit_distance", points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
-                Log.d(TAG, "distance updated: " + points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
+            Node phoneNode = DigitalWatchFaceService.getPhoneNode();
+            if (phoneNode == null || !phoneNode.isNearby()) {
+                Log.e(TAG, "Phone is not available");
+                return;
             }
-            if (points.get(0).getDataType().getFields().contains(Field.FIELD_STEPS)) {
-                prefs.putInt("fit_steps", points.get(0).getValue(Field.FIELD_STEPS).asInt());
-                Log.d(TAG, "steps updated: " + points.get(0).getValue(Field.FIELD_STEPS).asInt());
+
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "Location permission unavailable");
+                return;
             }
-            prefs.commit();
+
+            if (mGoogleApiClient == null || !mGoogleApiClient.isConnected()) {
+                Log.e(TAG, "google api client connect failed");
+                return;
+            }
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (!prefs.contains("weather_lat") || !prefs.contains("weather_lon")) {
+                Log.e(TAG, "Location is unavailable");
+                return;
+            }
+
+            //We have everything we need. Request will be made.
+            lastRequest = System.currentTimeMillis();
+
+            getWeather(prefs.getFloat("weather_lat", 0), prefs.getFloat("weather_lon", 0));
+        }
+
+        private void getWeather(double lat, double lon){
+            String url = String.format(Locale.US, WEATHER_URL, lat, lon, WEATHER_KEY);
+            getHttpRequest(url);
+        }
+
+        private void getHttpRequest(String url) {
+            DataMap config = new DataMap();
+            config.putString("url", url);
+
+            Node phoneNode = DigitalWatchFaceService.getPhoneNode();
+            if (phoneNode == null || !phoneNode.isNearby()) {
+                Log.e(TAG, "Phone is not available");
+                return;
+            }
+
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, phoneNode.getId(), ConfigListenerService.HTTP_PROXY_PATH, config.toByteArray()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+                @Override
+                public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                    Log.d(TAG, "Send message: " + sendMessageResult.getStatus().getStatusMessage());
+                }
+            });
         }
     }
 }

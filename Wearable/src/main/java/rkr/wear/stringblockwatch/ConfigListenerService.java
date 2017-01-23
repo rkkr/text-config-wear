@@ -16,6 +16,7 @@
 
 package rkr.wear.stringblockwatch;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -25,6 +26,9 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,7 +52,7 @@ public class ConfigListenerService extends WearableListenerService {
                 return;
             case HTTP_PROXY_PATH:
                 String response = DataMap.fromByteArray(messageEvent.getData()).getString("body");
-                WeatherService.getHttpRequestCallback(this.getApplicationContext(), response);
+                GetHttpRequestCallback(this.getApplicationContext(), response);
                 return;
         }
     }
@@ -87,6 +91,34 @@ public class ConfigListenerService extends WearableListenerService {
                 Log.e(TAG, "Unsupported setting type");
         }
 
+        prefs.commit();
+    }
+
+    public static void GetHttpRequestCallback(Context context, String contents) {
+        Log.d(TAG, contents);
+
+        SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        try {
+            JSONObject jObject = new JSONObject(contents);
+
+            prefs.putString("weather_description", jObject.getJSONArray("weather").getJSONObject(0).getString("main"));
+            prefs.putString("weather_icon", jObject.getJSONArray("weather").getJSONObject(0).getString("icon"));
+            prefs.putInt("weather_temp", jObject.getJSONObject("main").getInt("temp"));
+            prefs.putInt("weather_pressure", jObject.getJSONObject("main").getInt("pressure"));
+            prefs.putInt("weather_humidity", jObject.getJSONObject("main").getInt("humidity"));
+            //prefs.putInt("weather_temp_min", jObject.getJSONObject("main").getInt("temp_min"));
+            //prefs.putInt("weather_temp_max", jObject.getJSONObject("main").getInt("temp_max"));
+            prefs.putFloat("weather_wind_speed", (float)jObject.getJSONObject("wind").getDouble("speed"));
+            //prefs.putInt("weather_wind_direction", jObject.getJSONObject("wind").getInt("deg"));
+            //prefs.putString("weather_country", jObject.getJSONObject("sys").getString("country"));
+            prefs.putLong("weather_sunrise", jObject.getJSONObject("sys").getLong("sunrise"));
+            prefs.putLong("weather_sunset", jObject.getJSONObject("sys").getLong("sunset"));
+            prefs.putString("weather_city", jObject.getString("name"));
+            prefs.putLong("weather_update_time", System.currentTimeMillis());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         prefs.commit();
     }
 }
