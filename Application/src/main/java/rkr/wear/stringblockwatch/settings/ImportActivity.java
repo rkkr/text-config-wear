@@ -185,17 +185,17 @@ public class ImportActivity extends SettingsCommon {
 
     public static void ExportWatch(String fileName, Context context, String mWatchId)
     {
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())) {
-            Toast.makeText(context, "External storage not available", Toast.LENGTH_LONG).show();
-            return;
-        }
+        //if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())) {
+        //    Toast.makeText(context, "External storage not available", Toast.LENGTH_LONG).show();
+        //    return;
+        //}
 
         JSONObject jObject = new JSONObject();
         String settingsJson;
         Map<String, ?> settings = PreferenceManager.getDefaultSharedPreferences(context).getAll();
         try {
             for (String key : settings.keySet()) {
-                if (key.startsWith(mWatchId))
+                if (!key.startsWith(mWatchId))
                     continue;
                 Object item = settings.get(key);
                 if (item instanceof Set) {
@@ -304,6 +304,14 @@ public class ImportActivity extends SettingsCommon {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext(), mWatchId);
+                    return true;
+                }
+            });
+            sample = findPreference("watch_sample_4");
+            sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ImportWatch(getResources().openRawResource(R.raw.watch_sample4), preference.getContext(), mWatchId);
                     return true;
                 }
             });

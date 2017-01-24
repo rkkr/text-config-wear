@@ -19,7 +19,8 @@
         <NumberPicker
             android:id="@+id/pref_padding_left_picker"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="200dp"
+            android:descendantFocusability="blocksDescendants"/>
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -37,7 +38,8 @@
         <NumberPicker
             android:id="@+id/pref_padding_top_picker"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="200dp"
+            android:descendantFocusability="blocksDescendants"/>
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -55,7 +57,8 @@
         <NumberPicker
             android:id="@+id/pref_padding_bottom_picker"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="200dp"
+            android:descendantFocusability="blocksDescendants"/>
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -73,6 +76,7 @@
         <NumberPicker
             android:id="@+id/pref_padding_right_picker"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="200dp"
+            android:descendantFocusability="blocksDescendants"/>
     </LinearLayout>
 </LinearLayout>

@@ -52,7 +52,7 @@ public class SettingsCommon extends AppCompatActivity
     private static final String TAG = "SettingsCommon";
     private static final String PATH_WITH_FEATURE = "/watch_face_config";
 
-    private GoogleApiClient mGoogleApiClient;
+    public GoogleApiClient mGoogleApiClient;
     public String mWatchId;
     public SettingsManager mSettings;
 
@@ -116,17 +116,17 @@ public class SettingsCommon extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            Set<String> keys = prefs.getAll().keySet();
+            Set<String> keys = new HashSet<String>();
+            for (String key : prefs.getAll().keySet())
+                if (key.startsWith(mWatchId + "_"))
+                    keys.add(key);
+
             onSharedPreferenceChanged(prefs, keys);
         }
     };
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnected: " + connectionHint);
-        }
-
         if (mWatchId == null) {
             displayNoConnectedDeviceDialog();
         }
@@ -134,16 +134,11 @@ public class SettingsCommon extends AppCompatActivity
 
     @Override
     public void onConnectionSuspended(int cause) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnectionSuspended: " + cause);
-        }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnectionFailed: " + result);
-        }
+        Log.d(TAG, "onConnectionFailed: " + result);
     }
 
     private void displayNoConnectedDeviceDialog() {
@@ -162,6 +157,8 @@ public class SettingsCommon extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(mWatchId + "_checksum"))
+            return;
         Set<String> keys = new HashSet<>();
         keys.add(key);
         onSharedPreferenceChanged(sharedPreferences, keys);
@@ -178,12 +175,12 @@ public class SettingsCommon extends AppCompatActivity
             }
 
             if (!sharedPreferences.contains(key)) {
-                config.putString(key.replace(mWatchId, ""), null);
+                config.putString(key.replaceFirst(mWatchId + "_", ""), null);
                 continue;
             }
 
             Object pref = prefs.get(key);
-            key = key.replace(mWatchId + "_", "");
+            key = key.replaceFirst(mWatchId + "_", "");
             if (pref instanceof String)
                 config.putString(key, (String) pref);
             else if (pref instanceof Boolean)
@@ -198,10 +195,15 @@ public class SettingsCommon extends AppCompatActivity
                 Log.e(TAG, key + " unsupported type");
         }
 
-        if (config.size() > 0) {
+        //Add checksum
+        long timeStamp = System.currentTimeMillis();
+        config.putLong("checksum", timeStamp);
+
+        if (config.size() > 1) {
+            sharedPreferences.edit().putLong(mWatchId + "_checksum", timeStamp).apply();
             sendConfigUpdateMessage(config);
 
-            //Something changed in the settings. Ping boot service to check for Weather blocks.
+            //Something changed in the settings.
             Intent intent = new Intent("string.block.watch.SETTINGS_CHANGE");
             sendBroadcast(intent);
         }

@@ -212,7 +212,7 @@ public class SettingsRowActivity extends SettingsCommon {
 
             fab.setRotation(0.0F);
             fitButton.setAlpha(0);
-            fitButton.setY(275 * scale + weatherButton.getY());
+            fitButton.setY(275 * scale + fitButton.getY());
             weatherButton.setAlpha(0);
             weatherButton.setY(225 * scale + weatherButton.getY());
             timeButton.setAlpha(0);

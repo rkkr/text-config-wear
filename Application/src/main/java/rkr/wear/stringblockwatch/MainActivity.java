@@ -10,12 +10,16 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.wearable.companion.WatchFaceCompanion;
 import android.view.View;
 
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.Wearable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import rkr.wear.stringblockwatch.common.SettingsCommon;
 import rkr.wear.stringblockwatch.common.SettingsSharedFragment;
 import rkr.wear.stringblockwatch.row.SettingsRowActivity;
+import rkr.wear.stringblockwatch.service.HttpProxy;
 import rkr.wear.stringblockwatch.settings.AdvancedActivity;
 import rkr.wear.stringblockwatch.settings.ImportActivity;
 
@@ -56,6 +60,19 @@ public class MainActivity extends SettingsCommon {
             //We are started for the first time or app settings have been cleared
             ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext(), mWatchId);
             ImportActivity.ImportCommonSettings(getApplicationContext());
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        super.onConnected(connectionHint);
+
+        if (mWatchId != null) {
+            long checksum = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(mWatchId + "_checksum", 0);
+            DataMap data = new DataMap();
+            data.putLong("checksum", checksum);
+            byte[] rawData = data.toByteArray();
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mWatchId, HttpProxy.CHECKSUM_PATH, rawData);
         }
     }
 

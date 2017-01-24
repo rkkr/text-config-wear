@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class HttpProxy extends WearableListenerService {
     private static final String TAG = "HttpProxy";
     public static final String HTTP_PROXY_PATH = "/watch_face_proxy";
+    public static final String CHECKSUM_PATH = "/watch_face_checksum";
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
@@ -45,6 +46,11 @@ public class HttpProxy extends WearableListenerService {
                     Log.e(TAG, "Invalid url");
                 }
 
+                return;
+            case CHECKSUM_PATH:
+                Toast.makeText(getApplicationContext(), "Watch settings are out of sync, forcing update", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent("string.block.watch.FORCE_SYNC");
+                sendBroadcast(intent);
                 return;
         }
     }

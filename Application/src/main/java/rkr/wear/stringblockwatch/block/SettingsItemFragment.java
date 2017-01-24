@@ -48,8 +48,8 @@ public class SettingsItemFragment extends SettingsSharedFragment {
             public boolean onPreferenceClick(Preference preference) {
                 FragmentManager fm = getFragmentManager();
                 PrefOrderPickerActivity editOrderDialog = new PrefOrderPickerActivity();
-                editOrderDialog.itemNum = mRowId;
-                editOrderDialog.rowNum = mItemId;
+                editOrderDialog.itemNum = mItemId;
+                editOrderDialog.rowNum = mRowId;
                 editOrderDialog.mSettings = mSettings;
                 editOrderDialog.show(fm, "pref_order_picker");
                 return true;

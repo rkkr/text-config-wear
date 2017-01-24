@@ -10,8 +10,8 @@
         android:key="common_wallpaper_color" />
 
         <Preference
-            android:title="Sample watches"
-            android:summary="Import a sample configuration"
+            android:title="Sample and saved watches"
+            android:summary="Manage saved configurations"
             android:key="import" />
     </PreferenceCategory>
 

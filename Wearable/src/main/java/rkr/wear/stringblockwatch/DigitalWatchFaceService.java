@@ -402,6 +402,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     if (dailyTotalResult.getTotal() == null)
                         return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    if (points.isEmpty())
+                        return;
                     SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                     prefs.putFloat("fit_distance", points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
                     prefs.apply();
@@ -418,6 +420,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     if (dailyTotalResult.getTotal() == null)
                         return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    if (points.isEmpty())
+                        return;
                     SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                     prefs.putInt("fit_steps", points.get(0).getValue(Field.FIELD_STEPS).asInt());
                     prefs.apply();
@@ -434,6 +438,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     if (dailyTotalResult.getTotal() == null)
                         return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    if (points.isEmpty())
+                        return;
                     SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                     prefs.putFloat("fit_calories", points.get(0).getValue(Field.FIELD_CALORIES).asFloat());
                     prefs.apply();
@@ -450,6 +456,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     if (dailyTotalResult.getTotal() == null)
                         return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                    if (points.isEmpty())
+                        return;
                     SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                     prefs.putInt("fit_activity", points.get(0).getValue(Field.FIELD_DURATION).asInt());
                     prefs.apply();

@@ -20,23 +20,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class ConfigListenerService extends WearableListenerService {
     private static final String TAG = "DigitalListenerService";
-    public static final String SETTINGS_PATH = "/watch_face_config";
+    private static final String SETTINGS_PATH = "/watch_face_config";
     public static final String HTTP_PROXY_PATH = "/watch_face_proxy";
+    public static final String CHECKSUM_PATH = "/watch_face_checksum";
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
@@ -53,6 +64,19 @@ public class ConfigListenerService extends WearableListenerService {
             case HTTP_PROXY_PATH:
                 String response = DataMap.fromByteArray(messageEvent.getData()).getString("body");
                 GetHttpRequestCallback(this.getApplicationContext(), response);
+                return;
+            case CHECKSUM_PATH:
+                long checksumPhone = DataMap.fromByteArray(messageEvent.getData()).getLong("checksum");
+                long checksumWatch = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext()).getLong("checksum", 0);
+                if (checksumPhone != checksumWatch) {
+                    GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                            .addApi(Wearable.API)
+                            .useDefaultAccount()
+                            .build();
+                    googleApiClient.blockingConnect(30, TimeUnit.SECONDS);
+                    if (googleApiClient.isConnected())
+                        Wearable.MessageApi.sendMessage(googleApiClient, messageEvent.getSourceNodeId(), CHECKSUM_PATH, null);
+                }
                 return;
         }
     }

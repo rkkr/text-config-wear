@@ -21,7 +21,7 @@ public class SettingsDateActivity extends SettingsItemCommon {
 
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, fragment)
-                .commit();;
+                .commit();
     }
 
     public static class PreferencesFragment extends SettingsItemFragment {
