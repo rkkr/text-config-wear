@@ -23,17 +23,17 @@ public class DrawableFit extends DrawableItemCommon {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         switch (value) {
             case "Steps":
-                return String.format(Locale.US, "Steps: %d", prefs.getInt("fit_steps", 0));
+                return String.format(Locale.US, "%d", prefs.getInt("fit_steps", 0));
             case "Distance":
-                return String.format(Locale.US, "Distance: %.0fm", prefs.getFloat("fit_distance", 0));
+                return String.format(Locale.US, "%.0fm", prefs.getFloat("fit_distance", 0));
             case "Active time":
-                int totalMinutes = prefs.getInt("fit_activity", 0) / 1000 / 60;
+                int totalMinutes = prefs.getInt("fit_activity_time", 0) / 1000 / 60;
                 if (totalMinutes <= 60)
-                    return String.format(Locale.US, "Time: %dmin", totalMinutes);
+                    return String.format(Locale.US, "%dmin", totalMinutes);
                 else
-                    return String.format(Locale.US, "Time: %dh %dmin", totalMinutes / 60, totalMinutes % 60);
+                    return String.format(Locale.US, "%dh %dmin", totalMinutes / 60, totalMinutes % 60);
             case "Calories":
-                return String.format(Locale.US, "Calories: %.0fkcal", prefs.getFloat("fit_calories", 0));
+                return String.format(Locale.US, "%.0fkcal", prefs.getFloat("fit_calories", 0));
         }
 
         return "-";

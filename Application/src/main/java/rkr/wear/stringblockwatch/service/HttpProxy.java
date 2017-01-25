@@ -48,7 +48,7 @@ public class HttpProxy extends WearableListenerService {
 
                 return;
             case CHECKSUM_PATH:
-                Toast.makeText(getApplicationContext(), "Watch settings are out of sync, forcing update", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Syncing watch settings", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent("string.block.watch.FORCE_SYNC");
                 sendBroadcast(intent);
                 return;

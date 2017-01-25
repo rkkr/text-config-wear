@@ -112,19 +112,6 @@ public class ImportActivity extends SettingsCommon {
         }
     }
 
-    public static void ImportCommonSettings(Context context)
-    {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!prefs.contains("common_idle_mode_color"))
-            editor.putString("common_idle_mode_color", "Gray Scale");
-        if (!prefs.contains("common_peek_mode"))
-            editor.putString("common_peek_mode", "Black");
-        if (!prefs.contains("common_wallpaper_color"))
-            editor.putString("common_wallpaper_color", "0xFF000000");
-        editor.commit();
-    }
-
     public static void ImportWatch(InputStream inputStream, Context context, String mWatchId)
     {
         final int bufferSize = 1024;
@@ -159,14 +146,14 @@ public class ImportActivity extends SettingsCommon {
                     for (int i = 0; i < array.length(); i++)
                         _value.add(array.getString(i));
                     editor.putStringSet(key, _value);
-                } if (value instanceof Boolean) {
+                } else if (value instanceof Boolean) {
                     editor.putBoolean(key, (Boolean) value);
-                } if (value instanceof Integer) {
+                } else if (value instanceof Integer) {
                     editor.putInt(key, (Integer) value);
-                } if (value instanceof String) {
+                } else if (value instanceof String) {
                     editor.putString(key, (String) value);
                 } else {
-                    Log.e("ImportActivity", "Unsupported item to import");
+                    Log.e("ImportActivity", "Unsupported item to import: " + value.getClass());
                 }
             }
 
@@ -198,6 +185,7 @@ public class ImportActivity extends SettingsCommon {
                 if (!key.startsWith(mWatchId))
                     continue;
                 Object item = settings.get(key);
+                key = key.replaceFirst(mWatchId + "_", "");
                 if (item instanceof Set) {
                     JSONArray array = new JSONArray((Set<String>) item);
                     jObject.put(key, array);

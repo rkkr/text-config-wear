@@ -94,7 +94,7 @@ public class DrawableScreen {
 
     public int GetScreenColor()
     {
-        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("common_wallpaper_color", "0xFF000000");
+        String text = PreferenceManager.getDefaultSharedPreferences(context).getString("wallpaper_color", "0xFF000000");
         try {
             return (int) Long.parseLong(text.replaceFirst("0x", ""), 16);
         }
@@ -155,8 +155,6 @@ public class DrawableScreen {
             }
 
             editor.commit();
-            //Intent intent = new Intent("string.block.watch.FORCE_SYNC");
-            //context.sendBroadcast(intent);
         }
         catch (UnsupportedEncodingException e) {
             //Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show();

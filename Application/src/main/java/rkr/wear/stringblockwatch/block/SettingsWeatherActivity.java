@@ -106,10 +106,10 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
         public static HashSet<String> SaveDefaultSettings(SharedPreferences.Editor preferences, String phoneId, int rowNum, int itemNum)
         {
             HashSet<String> keys = SettingsItemFragment.SaveDefaultSettings(preferences, phoneId, rowNum, itemNum);
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_value");
-            preferences.putString("row_" + rowNum + "_item_" + itemNum + "_value", "Temperature");
-            keys.add("row_" + rowNum + "_item_" + itemNum + "_units");
-            preferences.putBoolean("row_" + rowNum + "_item_" + itemNum + "_show_units", true);
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value");
+            preferences.putString(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_value", "Temperature");
+            keys.add(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_units");
+            preferences.putBoolean(phoneId + "_row_" + rowNum + "_item_" + itemNum + "_show_units", true);
 
             return keys;
         }

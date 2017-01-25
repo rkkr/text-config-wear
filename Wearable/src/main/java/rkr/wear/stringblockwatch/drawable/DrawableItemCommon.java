@@ -25,7 +25,7 @@ public abstract class DrawableItemCommon implements IDrawableItem {
     {
         this.context = context;
         color = GetRowItemColor(rowIndex, itemIndex, "text_color", Color.WHITE);
-        switch (PreferenceManager.getDefaultSharedPreferences(context).getString("common_idle_mode_color", "Gray Scale")) {
+        switch (PreferenceManager.getDefaultSharedPreferences(context).getString("idle_mode_color", "White")) {
             case "White":
                 colorAmbient = Color.WHITE;
                 break;

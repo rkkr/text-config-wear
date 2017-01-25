@@ -44,10 +44,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.data.DataPoint;
@@ -215,7 +213,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (!needWeather)
                 return;
 
-            int REPEAT_TIME = 1000 * 60 * 15;
+            int REPEAT_TIME = 1000 * 60 * 30;
 
             AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
             final Intent weatherIntent = new Intent("text.config.wear.WEATHER_UPDATE");
@@ -343,7 +341,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             drawableScreen = new DrawableScreen(getApplicationContext());
 
-            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("common_peek_mode", "Black");
+            peekCardMode = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("peek_mode", "Black");
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
                     .setAcceptsTapEvents(false)
                     .setCardPeekMode(peekCardMode.equals("Hidden") ? WatchFaceStyle.PEEK_MODE_NONE : WatchFaceStyle.PEEK_MODE_VARIABLE)
@@ -355,8 +353,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             needWeather = drawableScreen.NeedsWeatherAccess();
             needFit = drawableScreen.NeedsFitAccess();
 
-            //check if weather block is added and request location access
-            if (needWeather && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //check if weather or fit block is added and request location access
+            if ((needWeather || needFit) && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Intent intent = new Intent(getApplicationContext(), PermissionActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
@@ -395,73 +393,57 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             //Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
                 public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
-                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                    if (!dailyTotalResult.getStatus().isSuccess() || dailyTotalResult.getTotal() == null) {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    if (dailyTotalResult.getTotal() == null)
-                        return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    if (points.isEmpty())
-                        return;
-                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                    prefs.putFloat("fit_distance", points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
-                    prefs.apply();
-                    Log.d(TAG, "distance: " + points.get(0).getValue(Field.FIELD_DISTANCE).asFloat());
+                    float value = 0;
+                    if (!points.isEmpty())
+                        value = points.get(0).getValue(Field.FIELD_DISTANCE).asFloat();
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putFloat("fit_distance", value).apply();
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
                 public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
-                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                    if (!dailyTotalResult.getStatus().isSuccess() || dailyTotalResult.getTotal() == null) {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    if (dailyTotalResult.getTotal() == null)
-                        return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    if (points.isEmpty())
-                        return;
-                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                    prefs.putInt("fit_steps", points.get(0).getValue(Field.FIELD_STEPS).asInt());
-                    prefs.apply();
-                    Log.d(TAG, "steps: " + points.get(0).getValue(Field.FIELD_STEPS).asInt());
+                    int value = 0;
+                    if (!points.isEmpty())
+                        value = points.get(0).getValue(Field.FIELD_STEPS).asInt();
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putInt("fit_steps", value).apply();
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_CALORIES_EXPENDED).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
                 public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
-                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                    if (!dailyTotalResult.getStatus().isSuccess() || dailyTotalResult.getTotal() == null) {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    if (dailyTotalResult.getTotal() == null)
-                        return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    if (points.isEmpty())
-                        return;
-                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                    prefs.putFloat("fit_calories", points.get(0).getValue(Field.FIELD_CALORIES).asFloat());
-                    prefs.apply();
-                    Log.d(TAG, "calories: " + points.get(0).getValue(Field.FIELD_CALORIES).asFloat());
+                    float value = 0;
+                    if (!points.isEmpty())
+                        value = points.get(0).getValue(Field.FIELD_CALORIES).asFloat();
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putFloat("fit_calories", value).apply();
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_ACTIVITY_SEGMENT).setResultCallback(new ResultCallback<DailyTotalResult>() {
                 @Override
                 public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
-                    if (!dailyTotalResult.getStatus().isSuccess()) {
+                    if (!dailyTotalResult.getStatus().isSuccess() || dailyTotalResult.getTotal() == null) {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    if (dailyTotalResult.getTotal() == null)
-                        return;
                     List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    if (points.isEmpty())
-                        return;
-                    SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                    prefs.putInt("fit_activity", points.get(0).getValue(Field.FIELD_DURATION).asInt());
-                    prefs.apply();
-                    Log.d(TAG, "activity: " + points.get(0).getValue(Field.FIELD_DURATION).asInt());
+                    int value = 0;
+                    if (!points.isEmpty())
+                        value = points.get(0).getValue(Field.FIELD_DURATION).asInt();
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putInt("fit_activity_time", value).apply();
                 }
             });
         }

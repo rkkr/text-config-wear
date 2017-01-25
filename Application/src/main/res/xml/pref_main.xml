@@ -1,0 +1,21 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="General Settings"
+        android:key="general_settings">
+
+        <Preference
+            android:title="Sample and saved watches"
+            android:summary="Manage saved configurations"
+            android:key="import" />
+
+        <Preference
+            android:title="Advanced Settings"
+            android:key="advanced" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Screen Rows"
+        android:key="rows" >
+    </PreferenceCategory>
+
+</PreferenceScreen>

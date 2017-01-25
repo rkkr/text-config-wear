@@ -169,7 +169,7 @@ public class SettingsCommon extends AppCompatActivity
         Map<String, ?> prefs = sharedPreferences.getAll();
 
         for (String key : keys) {
-            if (!key.startsWith(mWatchId + "_") && !key.startsWith("common_")) {
+            if (!key.startsWith(mWatchId + "_")) {
                 Log.e(TAG, "Setting not for phone used: " + key);
                 continue;
             }
@@ -187,6 +187,8 @@ public class SettingsCommon extends AppCompatActivity
                 config.putBoolean(key, (Boolean) pref);
             else if (pref instanceof Integer)
                 config.putInt(key, (Integer) pref);
+            else if (pref instanceof Long)
+                config.putLong(key, (Long) pref);
             else if (pref instanceof Set) {
                 Set<String> temp = (Set<String>) pref;
                 config.putStringArray(key, temp.toArray(new String[temp.size()]));

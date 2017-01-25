@@ -1,4 +1,7 @@
 {
+  "peek_mode": "Black",
+  "idle_mode_color": "White",
+  "wallpaper_color": "0xFF000000",
   "row_3_align": "Center",
   "row_3_padding_top": "10",
   "row_1_item_2_type": "Text",

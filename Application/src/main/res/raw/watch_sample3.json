@@ -1,4 +1,7 @@
 {
+  "peek_mode": "Black",
+  "idle_mode_color": "White",
+  "wallpaper_color": "0xFF000000",
   "row_4_items": "1,3,2",
   "row_5_item_1_type": "Weather",
   "row_2_item_3_text_color": "0xFFFFFFFF",

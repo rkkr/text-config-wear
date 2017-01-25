@@ -1,21 +1,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="Advanced Settings" >
-
-    <ListPreference
-        android:defaultValue="White"
-        android:title="Idle mode text color"
-        android:entries="@array/idle_modes"
-        android:entryValues="@array/idle_modes"
-        android:key="common_idle_mode_color" />
+        android:title="Advanced Settings"
+        android:key="advanced_settings">
     </PreferenceCategory>
-
-    <ListPreference
-        android:defaultValue="Black"
-        android:title="Peek card style"
-        android:entries="@array/peek_modes"
-        android:entryValues="@array/peek_modes"
-        android:key="common_peek_mode" />
 
     <Preference
         android:title="Force settings resync"

@@ -3,6 +3,7 @@ package rkr.wear.stringblockwatch;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
@@ -59,7 +60,6 @@ public class MainActivity extends SettingsCommon {
         if (!mSettings.HasSettings()) {
             //We are started for the first time or app settings have been cleared
             ImportActivity.ImportWatch(getApplicationContext().getResources().openRawResource(R.raw.watch_sample1), getApplicationContext(), mWatchId);
-            ImportActivity.ImportCommonSettings(getApplicationContext());
         }
     }
 
@@ -82,7 +82,10 @@ public class MainActivity extends SettingsCommon {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            addPreferencesFromResource(R.xml.pref_general);
+            addPreferencesFromResource(R.xml.pref_main);
+
+            PreferenceCategory category = (PreferenceCategory) findPreference("general_settings");
+            AddListPreference(category, "Wallpaper color", mWatchId + "_wallpaper_color", R.array.font_color, R.array.font_color_value);
 
             Preference advanced = findPreference("advanced");
             advanced.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
