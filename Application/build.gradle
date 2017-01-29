@@ -6,6 +6,7 @@ dependencies {
     compile 'com.android.support:design:25.1.0'
     compile 'com.google.android.support:wearable:1.4.0'
     compile 'com.google.android.gms:play-services-wearable:10.0.1'
+    //compile 'com.google.android.gms:play-services-fitness:10.0.1'
 
     wearApp project(':Wearable')
 }
@@ -18,8 +19,8 @@ android {
         applicationId "rkr.wear.stringblockwatch"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 5
-        versionName "1.4"
+        versionCode 8
+        versionName "1.6"
     }
 
     buildTypes {

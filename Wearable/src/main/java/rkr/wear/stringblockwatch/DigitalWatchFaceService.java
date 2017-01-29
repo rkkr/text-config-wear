@@ -44,11 +44,12 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.data.DataPoint;
+import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
@@ -62,7 +63,6 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 import rkr.wear.stringblockwatch.drawable.DrawableScreen;
@@ -72,6 +72,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
     private static final long NORMAL_UPDATE_RATE_MS = 1000;
     private static Node phoneNode;
+    public static float fitDistance = 0;
+    public static int fitSteps = 0;
+    public static float fitCalories = 0;
+    public static int fitActivityTime = 0;
 
     @Override
     public Engine onCreateEngine() {
@@ -88,6 +92,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements
             GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener,
             LocationListener {
 
         static final int MSG_UPDATE_TIME = 0;
@@ -130,7 +135,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         UpdateWeather();
                         break;
                     case "text.config.wear.FIT_UPDATE":
-                        FitUpdate();
+                        UpdateFit();
                         break;
                     default:
                         Log.e(TAG, "Unknown event received: " + intent.getAction());
@@ -167,6 +172,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     //.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
                     .useDefaultAccount()
                     .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
                     .build();
         }
 
@@ -227,14 +233,14 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (!needFit)
                 return;
 
-            int REPEAT_TIME = 1000 * 60;
+            int REPEAT_TIME = 1000 * 60 * 5;
 
             AlarmManager service = (AlarmManager) getApplication().getSystemService(Context.ALARM_SERVICE);
             final Intent weatherIntent = new Intent("text.config.wear.FIT_UPDATE");
             PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, weatherIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Calendar cal = Calendar.getInstance();
-            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis() + 1000 * 5, REPEAT_TIME, pending);
+            service.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), REPEAT_TIME, pending);
         }
 
         private void unregisterReceiver() {
@@ -289,6 +295,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
             mIsAmbient = inAmbientMode;
+            if (!mIsAmbient)
+                UpdateFit();
 
             invalidate();
             updateTimer();
@@ -382,12 +390,17 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             });
         }
 
-        private void FitUpdate() {
+        private void UpdateFit() {
             if (!needFit)
                 return;
 
             if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
                 return;
+
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "Location permission unavailable");
+                return;
+            }
 
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
             //Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_DISTANCE_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
@@ -397,11 +410,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    float value = 0;
-                    if (!points.isEmpty())
-                        value = points.get(0).getValue(Field.FIELD_DISTANCE).asFloat();
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putFloat("fit_distance", value).apply();
+                    DataSet totalSet = dailyTotalResult.getTotal();
+                    if (!totalSet.isEmpty())
+                        fitDistance = totalSet.getDataPoints().get(0).getValue(Field.FIELD_DISTANCE).asFloat();
+                    else
+                        fitDistance = 0;
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback(new ResultCallback<DailyTotalResult>() {
@@ -411,11 +424,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    int value = 0;
-                    if (!points.isEmpty())
-                        value = points.get(0).getValue(Field.FIELD_STEPS).asInt();
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putInt("fit_steps", value).apply();
+                    DataSet totalSet = dailyTotalResult.getTotal();
+                    if (!totalSet.isEmpty())
+                        fitSteps = totalSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                    else
+                        fitSteps = 0;
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_CALORIES_EXPENDED).setResultCallback(new ResultCallback<DailyTotalResult>() {
@@ -425,11 +438,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    float value = 0;
-                    if (!points.isEmpty())
-                        value = points.get(0).getValue(Field.FIELD_CALORIES).asFloat();
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putFloat("fit_calories", value).apply();
+                    DataSet totalSet = dailyTotalResult.getTotal();
+                    if (!totalSet.isEmpty())
+                        fitCalories = totalSet.getDataPoints().get(0).getValue(Field.FIELD_CALORIES).asFloat();
+                    else
+                        fitCalories = 0;
                 }
             });
             Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_ACTIVITY_SEGMENT).setResultCallback(new ResultCallback<DailyTotalResult>() {
@@ -439,11 +452,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         Log.e(TAG, "Fit update error: " + dailyTotalResult.getStatus().getStatusMessage());
                         return;
                     }
-                    List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                    int value = 0;
-                    if (!points.isEmpty())
-                        value = points.get(0).getValue(Field.FIELD_DURATION).asInt();
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putInt("fit_activity_time", value).apply();
+                    DataSet totalSet = dailyTotalResult.getTotal();
+                    if (!totalSet.isEmpty())
+                        fitActivityTime = totalSet.getDataPoints().get(0).getValue(Field.FIELD_DURATION).asInt();
+                    else
+                        fitActivityTime = 0;
                 }
             });
         }
@@ -484,6 +497,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onConnectionSuspended(int i) {
+        }
+
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         }
 
         @Override

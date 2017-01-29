@@ -2,7 +2,6 @@ package rkr.wear.stringblockwatch.block;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.ListPreference;
 
 import java.util.HashSet;
 

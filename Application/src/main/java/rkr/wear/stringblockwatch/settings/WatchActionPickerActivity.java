@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import rkr.wear.stringblockwatch.R;
 
@@ -36,7 +37,9 @@ public class WatchActionPickerActivity extends DialogFragment {
                 String item = (String) list.getItemAtPosition(position);
                 switch (item) {
                     case "Import":
-                        ImportActivity.ImportWatch(fileName, view.getContext(), mWatchId);
+                        String result = ImportActivity.ImportWatch(fileName, view.getContext(), mWatchId);
+                        if (result != null)
+                            Toast.makeText(view.getContext(), result, Toast.LENGTH_LONG).show();
                         getDialog().dismiss();
                         break;
                     case "Overwrite":

@@ -1,19 +1,25 @@
 package rkr.wear.stringblockwatch.settings;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
-import android.os.Environment;
+import android.net.Uri;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -42,6 +48,10 @@ import rkr.wear.stringblockwatch.common.SettingsCommon;
 
 public class ImportActivity extends SettingsCommon {
 
+    private static final int STORAGE_PERMISSION_REQUEST = 1;
+    private static final int FILE_REQUEST = 2;
+    private static  final String TAG = "ImportActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,19 +78,93 @@ public class ImportActivity extends SettingsCommon {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.import_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_action_import) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+            } else {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("application/*");
+                startActivityForResult(intent, FILE_REQUEST);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == STORAGE_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                startActivityForResult(intent, FILE_REQUEST);
+            } else {
+                //don't ask again?
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FILE_REQUEST && resultCode == Activity.RESULT_OK) {
+            Log.d(TAG, "Opening file: " + data.getDataString());
+            final Uri uri = data.getData();
+
+            final ProgressDialog progress = new ProgressDialog(this);
+            progress.setMessage("Downloading...");
+            progress.setCancelable(false);
+            progress.show();
+
+            new Thread(new Runnable() {
+                public void run() {
+
+                    try {
+                        InputStream inputStream = getContentResolver().openInputStream(uri);
+                        String result = ImportWatch(inputStream, getApplicationContext(), mWatchId);
+                        if (result == null)
+                            toastInUiThread("File imported");
+                        else
+                            toastInUiThread(result);
+                    } catch (FileNotFoundException e) {
+                        toastInUiThread("File not found");
+                    }
+                    progress.dismiss();
+                }
+            }).start();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         //Not needed here
+    }
+
+    public void toastInUiThread(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public static void RenameWatch(String oldName, String newName, Context context) {
         File oldFile = GetWatchFile(context, oldName);
         if (!oldFile.exists()) {
-            Log.e("ImportActivity", "File " + oldName + " not found");
+            Log.e(TAG, "File " + oldName + " not found");
             return;
         }
         File newFile = GetWatchFile(context, newName);
         if (newFile.exists()) {
-            Log.e("ImportActivity", "File " + newName + " already exists");
+            Log.e(TAG, "File " + newName + " already exists");
             return;
         }
         oldFile.renameTo(newFile);
@@ -91,28 +175,30 @@ public class ImportActivity extends SettingsCommon {
     public static void DeleteWatch(String fileName, Context context) {
         File file = GetWatchFile(context, fileName);
         if (!file.exists()) {
-            Log.e("ImportActivity", "File " + fileName + " not found");
+            Log.e(TAG, "File " + fileName + " not found");
             return;
         }
         file.delete();
     }
 
-    public static void ImportWatch(String fileName, Context context, String mWatchId) {
+    public static String ImportWatch(String fileName, Context context, String mWatchId) {
+        String result = null;
         try {
             File file = GetWatchFile(context, fileName);
             if (!file.exists()) {
-                Log.e("ImportActivity", "File " + fileName + " not found");
-                return;
+                Log.e(TAG, "File " + fileName + " not found");
+                return "File " + fileName + " not found";
             }
 
             FileInputStream inputStream = new FileInputStream(file);
-            ImportWatch(inputStream, context, mWatchId);
+            result = ImportWatch(inputStream, context, mWatchId);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            return "File " + fileName + " not found";
         }
+        return result;
     }
 
-    public static void ImportWatch(InputStream inputStream, Context context, String mWatchId)
+    public static String ImportWatch(InputStream inputStream, Context context, String mWatchId)
     {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
@@ -150,10 +236,12 @@ public class ImportActivity extends SettingsCommon {
                     editor.putBoolean(key, (Boolean) value);
                 } else if (value instanceof Integer) {
                     editor.putInt(key, (Integer) value);
+                } else if (value instanceof Long) {
+                    editor.putLong(key, (Long) value);
                 } else if (value instanceof String) {
                     editor.putString(key, (String) value);
                 } else {
-                    Log.e("ImportActivity", "Unsupported item to import: " + value.getClass());
+                    Log.e(TAG, "Unsupported item to import: " + value.getClass());
                 }
             }
 
@@ -162,12 +250,13 @@ public class ImportActivity extends SettingsCommon {
             context.sendBroadcast(intent);
         }
         catch (UnsupportedEncodingException e) {
-            Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show();
+            return "Invalid file encoding";
         } catch (IOException e) {
-            Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show();
+            return "Failed to read file";
         } catch (JSONException e) {
-            Toast.makeText(context, "Failed to parse file", Toast.LENGTH_SHORT).show();
+            return "Failed to decode file contents";
         }
+        return null;
     }
 
     public static void ExportWatch(String fileName, Context context, String mWatchId)
@@ -201,7 +290,7 @@ public class ImportActivity extends SettingsCommon {
             outputStream.write(settingsJson.getBytes());
             outputStream.close();
 
-            MediaScannerConnection.scanFile(context, new String[] {file.getAbsolutePath()}, null, null);
+            MediaScannerConnection.scanFile(context, new String[] {file.getAbsolutePath()}, new String[] {"application/json"}, null);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -225,7 +314,9 @@ public class ImportActivity extends SettingsCommon {
         File folder = new File(context.getExternalFilesDir(null), "saved_watches");
         if (folder.exists())
             for (String file : folder.list())
-                watches.add(file);
+                if (file.endsWith(".json"))
+                    watches.add(file);
+
 
         return watches;
     }
@@ -243,8 +334,6 @@ public class ImportActivity extends SettingsCommon {
 
                 List<String> watches = ListSavedWatches(mContext);
                 for (final String watch : watches) {
-                    if (!watch.endsWith(".json"))
-                        continue;
                     Preference pref = new Preference(mContext);
                     pref.setTitle(watch.substring(0, watch.lastIndexOf(".json")));
 
@@ -262,6 +351,11 @@ public class ImportActivity extends SettingsCommon {
                     });
                     category.addPreference(pref);
                 }
+                if (watches.isEmpty()) {
+                    Preference pref = new Preference(mContext);
+                    pref.setSummary("Click + button to save current configuration");
+                    category.addPreference(pref);
+                }
             }
         };
 
@@ -275,7 +369,9 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample1), preference.getContext(), mWatchId);
+                    String result = ImportWatch(getResources().openRawResource(R.raw.watch_sample1), preference.getContext(), mWatchId);
+                    if (result != null)
+                        Toast.makeText(preference.getContext(), result, Toast.LENGTH_LONG).show();
                     return true;
                 }
             });
@@ -283,7 +379,9 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext(), mWatchId);
+                    String result = ImportWatch(getResources().openRawResource(R.raw.watch_sample2), preference.getContext(), mWatchId);
+                    if (result != null)
+                        Toast.makeText(preference.getContext(), result, Toast.LENGTH_LONG).show();
                     return true;
                 }
             });
@@ -291,7 +389,9 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext(), mWatchId);
+                    String result = ImportWatch(getResources().openRawResource(R.raw.watch_sample3), preference.getContext(), mWatchId);
+                    if (result != null)
+                        Toast.makeText(preference.getContext(), result, Toast.LENGTH_LONG).show();
                     return true;
                 }
             });
@@ -299,7 +399,9 @@ public class ImportActivity extends SettingsCommon {
             sample.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ImportWatch(getResources().openRawResource(R.raw.watch_sample4), preference.getContext(), mWatchId);
+                    String result = ImportWatch(getResources().openRawResource(R.raw.watch_sample4), preference.getContext(), mWatchId);
+                    if (result != null)
+                        Toast.makeText(preference.getContext(), result, Toast.LENGTH_LONG).show();
                     return true;
                 }
             });
