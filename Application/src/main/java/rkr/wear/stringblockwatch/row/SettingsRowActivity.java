@@ -271,7 +271,7 @@ public class SettingsRowActivity extends SettingsCommon {
 
             PreferenceCategory category = (PreferenceCategory)findPreference("row_general");
 
-            AddListPreference(category, "Alignment", "row_" + mRowId + "_align", R.array.align_modes);
+            AddListPreference(category, "Alignment", mWatchId + "_row_" + mRowId + "_align", R.array.align_modes);
             Preference paddingPref = AddPreference(category, "Padding");
             paddingPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -279,6 +279,7 @@ public class SettingsRowActivity extends SettingsCommon {
                     FragmentManager fm = getFragmentManager();
                     RowPaddingPickerActivity editPaddingDialog = new RowPaddingPickerActivity();
                     editPaddingDialog.rowNum = mRowId;
+                    editPaddingDialog.mWatchId = mWatchId;
                     editPaddingDialog.show(fm, "pref_padding_picker");
                     return true;
                 }

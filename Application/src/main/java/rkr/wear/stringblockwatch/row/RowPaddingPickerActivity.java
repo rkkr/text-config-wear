@@ -16,7 +16,8 @@ import rkr.wear.stringblockwatch.R;
 public class RowPaddingPickerActivity extends DialogFragment {
 
     public int rowNum;
-    private static final String[] paddingList = new String[]{"0", "5", "10", "20", "40", "80", "160"};
+    public String mWatchId;
+    private static final String[] paddingList = new String[]{"0", "5", "10", "20", "30", "40", "50", "75", "100", "125", "150", "175", "200"};
 
     public RowPaddingPickerActivity() {
     }
@@ -53,10 +54,10 @@ public class RowPaddingPickerActivity extends DialogFragment {
         topList.setWrapSelectorWheel(false);
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        final int leftListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_left", "10"));
-        final int bottomListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_bottom", "10"));
-        final int rightListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_right", "10"));
-        final int topListValue = indexOf(prefs.getString("row_" + rowNum + "_padding_top", "10"));
+        final int leftListValue = indexOf(prefs.getString(mWatchId + "_row_" + rowNum + "_padding_left", "10"));
+        final int bottomListValue = indexOf(prefs.getString(mWatchId + "_row_" + rowNum + "_padding_bottom", "10"));
+        final int rightListValue = indexOf(prefs.getString(mWatchId + "_row_" + rowNum + "_padding_right", "10"));
+        final int topListValue = indexOf(prefs.getString(mWatchId + "_row_" + rowNum + "_padding_top", "10"));
 
         leftList.setValue(leftListValue);
         bottomList.setValue(bottomListValue);
@@ -68,13 +69,13 @@ public class RowPaddingPickerActivity extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (leftList.getValue() != leftListValue)
-                                    prefs.edit().putString("row_" + rowNum + "_padding_left", paddingList[leftList.getValue()]).apply();
+                                    prefs.edit().putString(mWatchId + "_row_" + rowNum + "_padding_left", paddingList[leftList.getValue()]).apply();
                                 if (bottomList.getValue() != bottomListValue)
-                                    prefs.edit().putString("row_" + rowNum + "_padding_bottom", paddingList[bottomList.getValue()]).apply();
+                                    prefs.edit().putString(mWatchId + "_row_" + rowNum + "_padding_bottom", paddingList[bottomList.getValue()]).apply();
                                 if (rightList.getValue() != rightListValue)
-                                    prefs.edit().putString("row_" + rowNum + "_padding_right", paddingList[rightList.getValue()]).apply();
+                                    prefs.edit().putString(mWatchId + "_row_" + rowNum + "_padding_right", paddingList[rightList.getValue()]).apply();
                                 if (topList.getValue() != topListValue)
-                                    prefs.edit().putString("row_" + rowNum + "_padding_top", paddingList[topList.getValue()]).apply();
+                                    prefs.edit().putString(mWatchId + "_row_" + rowNum + "_padding_top", paddingList[topList.getValue()]).apply();
                                 dialog.dismiss();
                             }
                         }
