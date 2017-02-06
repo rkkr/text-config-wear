@@ -91,10 +91,10 @@ public class DrawableWeather extends DrawableItemCommon {
                 calendar.setTimeInMillis(prefs.getLong("weather_sunrise", 0) * 1000L);
                 if (prefs.contains("weather_sunrise"))
                     switch (units) {
-                        case "Time (24)":
-                            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE);
-                        case "Time (12)":
-                            return calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE);
+                        case "Time (24H)":
+                            return String.format(Locale.US, "%d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+                        case "Time (12H)":
+                            return String.format(Locale.US, "%d:%02d", calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE));
                         case "Time remaining":
                             long remaining = calendar.getTimeInMillis() - System.currentTimeMillis();
                             while (remaining < 0)
@@ -108,10 +108,10 @@ public class DrawableWeather extends DrawableItemCommon {
                 calendar.setTimeInMillis(prefs.getLong("weather_sunset", 0) * 1000L);
                 if (prefs.contains("weather_sunset"))
                     switch (units) {
-                        case "Time (24)":
-                            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE);
-                        case "Time (12)":
-                            return calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE);
+                        case "Time (24H)":
+                            return String.format(Locale.US, "%d:%02d", calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+                        case "Time (12H)":
+                            return String.format(Locale.US, "%d:%02d", calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE));
                         case "Time remaining":
                             long remaining = calendar.getTimeInMillis() - System.currentTimeMillis();
                             while (remaining < 0)

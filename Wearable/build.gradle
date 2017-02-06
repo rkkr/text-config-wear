@@ -15,8 +15,8 @@ android {
         applicationId "rkr.wear.stringblockwatch"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 8
-        versionName "1.6"
+        versionCode 9
+        versionName "1.7"
     }
 
     buildTypes {

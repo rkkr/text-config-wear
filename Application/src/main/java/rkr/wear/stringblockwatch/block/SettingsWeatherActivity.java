@@ -66,7 +66,7 @@ public class SettingsWeatherActivity extends SettingsItemCommon {
                             unitsPref.setValue("City");
                             break;
                         default:
-                            return false;
+                            return true;
                     }
                     return true;
                 }
